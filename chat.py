@@ -4,7 +4,7 @@ import socket
 import argparse
 
 parser = argparse.ArgumentParser(description='Sends some data back and forth.')
-parser.add_argument('-n', '--hostname', type=str,
+parser.add_argument('-n', '--hostname', type=str, required=True,
                    help='Network name of the other computer')
 
 args = parser.parse_args()
@@ -22,6 +22,8 @@ if hostname.endswith('.local'):
     SERVER_IP = socket.gethostbyname(hostname)
 else:
     SERVER_IP = socket.gethostbyname(hostname+'.local')
+
+print SERVER_IP, CLIENT_IP
 
 TCP_PORT = 5005
 BUFFER_SIZE = 1024
