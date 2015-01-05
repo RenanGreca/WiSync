@@ -7,8 +7,21 @@ Entering a blank line will exit the client.
 
 import socket
 import sys
+import argparse
 
-host = 'localhost'
+parser = argparse.ArgumentParser(description='Sends some data back and forth.')
+parser.add_argument('-n', '--hostname', type=str, required=True,
+                   help='Network name of the other computer')
+
+args = parser.parse_args()
+
+hostname = args.hostname
+if hostname.endswith('.local'):
+    host = socket.gethostbyname(hostname)
+else:
+    host = socket.gethostbyname(hostname+'.local')
+
+#host = 'localhost'
 port = 50000
 size = 1024
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

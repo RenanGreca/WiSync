@@ -9,10 +9,15 @@ import select
 import socket
 import sys
 import threading
+import argparse
+
+parser = argparse.ArgumentParser(description='Sends some data back and forth.')
+parser.add_argument('-n', '--hostname', type=str, required=True,
+                   help='Network name of the other computer')
 
 class Server:
-    def __init__(self):
-        self.host = ''
+    def __init__(self, hostname):
+        self.host = hostname
         self.port = 50000
         self.backlog = 5
         self.size = 1024
@@ -75,7 +80,16 @@ class Client(threading.Thread):
                 running = 0
 
 if __name__ == "__main__":
-    s = Server()
+    args = parser.parse_args()
+
+    hostname = socket.gethostname()
+    if hostname.endswith('.local'):
+        host = socket.gethostbyname(hostname)
+    else:
+        host = socket.gethostbyname(hostname+'.local')
+
+
+    s = Server(host)
     s.run()
 
 
