@@ -5,6 +5,7 @@ import argparse
 import socket
 import sys
 import threading
+from time import sleep
 from multiprocessing import Process
 from socklib import Server
 from socklib import Client
@@ -30,7 +31,7 @@ if hostname.endswith('.local'):
 else:
     host = socket.gethostbyname(hostname+'.local')
 
-time.sleep(2);
+sleep(2);
 #host = 'localhost'
 port = 50000
 size = 1024
