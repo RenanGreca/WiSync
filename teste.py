@@ -41,7 +41,7 @@ def client():
         if line == '\n':
             break
         s.send(line)
-        data = s.recv(size)
+        #data = s.recv(size)
         sys.stdout.write(data)
         sys.stdout.write('%')
 
