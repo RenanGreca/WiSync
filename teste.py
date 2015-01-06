@@ -16,40 +16,45 @@ parser.add_argument('-n', '--hostname', type=str, required=True,
 
 args = parser.parse_args()
 
+def client():
+
+    hostname = args.hostname
+
+    if hostname.endswith('.local'):
+        host = socket.gethostbyname(hostname)
+    else:
+        host = socket.gethostbyname(hostname+'.local')
+
+    sleep(2);
+    #host = 'localhost'
+
+    port = 50000
+    size = 1024
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print 'Conectando ao servidor: '+host+':'+str(port)
+    s.connect((host,port))
+    sys.stdout.write('%')
+
+    while 1:
+        # read from keyboard
+        line = sys.stdin.readline()
+        if line == '\n':
+            break
+        s.send(line)
+        data = s.recv(size)
+        sys.stdout.write(data)
+        sys.stdout.write('%')
+
+    proc.join()
+    s.close()
+
 """
 An echo client that allows the user to send multiple lines to the server.
 Entering a blank line will exit the client.
 """
-server = Server()
-proc = Process(target=server.run)
-#server.run()
+
+proc = Process(target=client)
 proc.start()
 
-hostname = args.hostname
-if hostname.endswith('.local'):
-    host = socket.gethostbyname(hostname)
-else:
-    host = socket.gethostbyname(hostname+'.local')
-
-sleep(5);
-#host = 'localhost'
-
-port = 50000
-size = 1024
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print 'Conectando ao servidor: '+host+':'+str(port)
-s.connect((host,port))
-sys.stdout.write('%')
-
-while 1:
-    # read from keyboard
-    line = sys.stdin.readline()
-    if line == '\n':
-        break
-    s.send(line)
-    data = s.recv(size)
-    sys.stdout.write(data)
-    sys.stdout.write('%')
-
-proc.join()
-s.close()
+server = Server()
+server.run()
