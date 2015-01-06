@@ -20,7 +20,7 @@ class Server():
             self.ip = socket.gethostbyname(self.host)
         else:
             self.ip = socket.gethostbyname(self.host+'.local')
-        self.host = ''
+        #self.host = ''
         self.port = 50000
         self.backlog = 5
         self.size = 1024
@@ -30,10 +30,10 @@ class Server():
     def open_socket(self):
         try:
             self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.server.bind((self.host,self.port))
+            self.server.bind((self.ip,self.port))
             self.server.listen(5)
 
-            print "Servidor rodando"
+            print "Servidor rodando - "+self.ip+':'+str(self.port)
             print self.server
         except socket.error, (value,message):
             if self.server:

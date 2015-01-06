@@ -31,11 +31,13 @@ if hostname.endswith('.local'):
 else:
     host = socket.gethostbyname(hostname+'.local')
 
-sleep(2);
+sleep(5);
 #host = 'localhost'
+
 port = 50000
 size = 1024
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print 'Conectando ao servidor: '+host+':'+str(port)
 s.connect((host,port))
 sys.stdout.write('%')
 
