@@ -33,17 +33,18 @@ def client():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     print 'Conectando ao servidor: '+host+':'+str(port)
     s.connect((host,port))
-    sys.stdout.write('%')
+    #sys.stdout.write('%')
 
     while 1:
         # read from keyboard
-        line = sys.stdin.readline()
+        line = raw_input('#')
+        #line = sys.stdin.readline()
         if line == '\n':
             break
         s.send(line)
         #data = s.recv(size)
         #sys.stdout.write(data)
-        sys.stdout.write('%')
+        #sys.stdout.write('%')
 
     proc.join()
     s.close()
