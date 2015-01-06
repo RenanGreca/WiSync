@@ -11,16 +11,15 @@ import socket
 import sys
 import threading
 
-class Server(threading.Thread):
+class Server():
     def __init__(self):
-        threading.Thread.__init__(self)
         # Utilizando o nome do host (o computador rodando o script)
         # Encontramos seu endereço IP local
-        #self.host = socket.gethostname()
-        #if self.host.endswith('.local'):
-        #    self.ip = socket.gethostbyname(self.host)
-        #else:
-        #    self.ip = socket.gethostbyname(self.host+'.local')
+        self.host = socket.gethostname()
+        if self.host.endswith('.local'):
+            self.ip = socket.gethostbyname(self.host)
+        else:
+            self.ip = socket.gethostbyname(self.host+'.local')
         self.host = ''
         self.port = 50000
         self.backlog = 5
