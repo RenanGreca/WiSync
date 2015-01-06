@@ -30,6 +30,7 @@ if hostname.endswith('.local'):
 else:
     host = socket.gethostbyname(hostname+'.local')
 
+time.sleep(2);
 #host = 'localhost'
 port = 50000
 size = 1024
