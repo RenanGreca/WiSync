@@ -63,7 +63,7 @@ class Server():
                         break
                         running = 0 
                     for client in self.threads:
-                        client.send(line)
+                        client.client.send(line)
 
         # close all threads
 
@@ -85,7 +85,7 @@ class Client(threading.Thread):
             data = self.client.recv(self.size)
             if data:
                 sys.stdout.write(data)
-                self.client.send(data)
+                #self.client.send(data)
             else:
                 self.client.close()
                 running = 0
