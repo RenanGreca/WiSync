@@ -22,6 +22,15 @@ var/
 .installed.cfg
 *.egg
 
+# LaTeX
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.synctex.gz
+*.toc
+*.sty
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
