@@ -79,7 +79,7 @@ class Client(threading.Thread):
         while running:
             data = self.client.recv(self.size)
             if data:
-                print data
+                sys.stdout.write(data)
                 self.client.send(data)
             else:
                 self.client.close()
