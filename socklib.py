@@ -63,6 +63,7 @@ class Server():
                         break
                         running = 0 
                     for client in self.threads:
+                        print "Enviando ", line
                         client.client.send(line)
 
         # close all threads

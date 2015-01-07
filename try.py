@@ -81,12 +81,12 @@ def client():
 
     while 1:
         # read from keyboard
-        line = sys.stdin.readline()
-        if line == '\n':
-            break
-        s.send(line)
+        #line = sys.stdin.readline()
+        #if line == '\n':
+        #    break
+        #s.send(line)
         data = s.recv(size)
-        #sys.stdout.write(data)
+        sys.stdout.write(data)
         sys.stdout.write('%')
 
     proc.join()
