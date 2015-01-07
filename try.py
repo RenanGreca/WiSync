@@ -88,7 +88,8 @@ def client():
 
             if sel == s:
                 data = s.recv(size)
-                sys.stdout.write(">", data)
+                sys.stdout.write(">")
+                sys.stdout.write(data)
 
             elif sel == sys.stdin:
                 # handle standard input
