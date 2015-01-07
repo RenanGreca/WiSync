@@ -58,8 +58,12 @@ class Server():
 
                 elif s == sys.stdin:
                     # handle standard input
-                    junk = sys.stdin.readline()
-                    running = 0 
+                    line = sys.stdin.readline()
+                    if line == '\n':
+                        break
+                        running = 0 
+                    for client in self.threads:
+                        client.send(line)
 
         # close all threads
 
@@ -76,6 +80,7 @@ class Client(threading.Thread):
 
     def run(self):
         running = 1
+        sys.stdout.write('%')
         while running:
             data = self.client.recv(self.size)
             if data:
