@@ -42,6 +42,7 @@ class Server():
             sys.exit(1)
 
     def run(self):
+        sys.stdout.write('%')
         self.open_socket()
         input = [self.server,sys.stdin]
         running = 1
@@ -66,6 +67,7 @@ class Server():
                         print "Enviando ", line
                         client.client.send(line)
 
+            sys.stdout.write('%')
         # close all threads
 
         self.server.close()
@@ -81,7 +83,6 @@ class Client(threading.Thread):
 
     def run(self):
         running = 1
-        sys.stdout.write('%')
         while running:
             data = self.client.recv(self.size)
             if data:

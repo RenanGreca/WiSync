@@ -4,6 +4,7 @@
 import argparse
 import socket
 import sys
+import select
 import threading
 from time import sleep
 from multiprocessing import Process
@@ -79,15 +80,39 @@ def client():
     s.connect((host,port))
     sys.stdout.write('%')
 
-    while 1:
-        # read from keyboard
-        #line = sys.stdin.readline()
-        #if line == '\n':
-        #    break
-        #s.send(line)
-        data = s.recv(size)
-        sys.stdout.write(data)
+
+    input = [s,sys.stdin]
+    running = 1
+    while running:
+        inputready,outputready,exceptready = select.select(input,[],[])
+
+        for sel in inputready:
+
+            if sel == s:
+                data = s.recv(size)
+                sys.stdout.write(data)
+
+            elif sel == sys.stdin:
+                # handle standard input
+                line = sys.stdin.readline()
+                if line == '\n':
+                    break
+                    running = 0 
+                for client in self.threads:
+                    print "Enviando ", line
+                    client.client.send(line)
+
         sys.stdout.write('%')
+
+    #while 1:
+    # read from keyboard
+    #line = sys.stdin.readline()
+    #if line == '\n':
+    #    break
+    #s.send(line)
+    #data = s.recv(size)
+    #sys.stdout.write(data)
+    #sys.stdout.write('%')
 
     proc.join()
     s.close()
