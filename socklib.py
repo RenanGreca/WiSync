@@ -46,8 +46,6 @@ class Server():
         input = [self.server,sys.stdin]
         running = 1
         while running:
-            sys.stdout.write('%')
-
             inputready,outputready,exceptready = select.select(input,[],[])
 
             for s in inputready:
@@ -65,7 +63,6 @@ class Server():
                         break
                         running = 0 
                     for client in self.threads:
-                        print "Enviando ", line
                         client.client.send(line)
 
         # close all threads
@@ -86,7 +83,7 @@ class Client(threading.Thread):
         while running:
             data = self.client.recv(self.size)
             if data:
-                sys.stdout.write(data)
+                sys.stdout.write(">", data)
                 #self.client.send(data)
             else:
                 self.client.close()

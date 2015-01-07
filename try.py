@@ -82,15 +82,13 @@ def client():
     input = [s,sys.stdin]
     running = 1
     while running:
-        sys.stdout.write('%')
-
         inputready,outputready,exceptready = select.select(input,[],[])
 
         for sel in inputready:
 
             if sel == s:
                 data = s.recv(size)
-                sys.stdout.write(data)
+                sys.stdout.write(">", data)
 
             elif sel == sys.stdin:
                 # handle standard input
