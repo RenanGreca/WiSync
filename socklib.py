@@ -42,11 +42,12 @@ class Server():
             sys.exit(1)
 
     def run(self):
-        sys.stdout.write('%')
         self.open_socket()
         input = [self.server,sys.stdin]
         running = 1
         while running:
+            sys.stdout.write('%')
+
             inputready,outputready,exceptready = select.select(input,[],[])
 
             for s in inputready:
@@ -67,7 +68,6 @@ class Server():
                         print "Enviando ", line
                         client.client.send(line)
 
-            sys.stdout.write('%')
         # close all threads
 
         self.server.close()

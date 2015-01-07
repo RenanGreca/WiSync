@@ -78,12 +78,12 @@ def client():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #print 'Conectando ao servidor: '+host+':'+str(port)
     s.connect((host,port))
-    sys.stdout.write('%')
-
 
     input = [s,sys.stdin]
     running = 1
     while running:
+        sys.stdout.write('%')
+
         inputready,outputready,exceptready = select.select(input,[],[])
 
         for sel in inputready:
@@ -98,11 +98,9 @@ def client():
                 if line == '\n':
                     break
                     running = 0 
-                for client in self.threads:
-                    print "Enviando ", line
-                    client.client.send(line)
+                #print "Enviando ", line
+                s.send(line)
 
-        sys.stdout.write('%')
 
     #while 1:
     # read from keyboard
