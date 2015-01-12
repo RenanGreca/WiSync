@@ -83,9 +83,16 @@ class Client(threading.Thread):
         while running:
             data = self.client.recv(self.size)
             if data:
-                sys.stdout.write(">")
-                sys.stdout.write(data)
-                #self.client.send(data)
+                if data == 'file\n':
+                    print "Recebendo arquivo..."
+                    stuff = self.client.recv(self.size)
+                    f = open("out", "w")
+                    f.write(stuff)
+                    f.close()
+                else:
+                    sys.stdout.write(">")
+                    sys.stdout.write(data)
+                    #self.client.send(data)
             else:
                 self.client.close()
                 running = 0

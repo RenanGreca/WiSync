@@ -6,6 +6,8 @@ import socket
 import sys
 import select
 import threading
+import os
+from sendfile import sendfile
 from time import sleep
 from multiprocessing import Process
 from socklib import Server
@@ -94,11 +96,26 @@ def client():
             elif sel == sys.stdin:
                 # handle standard input
                 line = sys.stdin.readline()
+                print line
                 if line == '\n':
                     break
-                    running = 0 
-                #print "Enviando ", line
-                s.send(line)
+                    running = 0
+                if line == 'file\n':
+                    s.send(line)
+                    print "#partiu enviar arquivo"
+                    filename = sys.stdin.readline()[:-1]
+                    f = open(filename, "rb")
+                    blocksize = os.path.getsize(filename)
+                    offset = 0
+                    while True:
+                        sent = sendfile(s.fileno(), f.fileno(), offset, blocksize)
+                        if sent == 0:
+                            break #EOF
+                        offset += sent
+                    f.close()
+                else:
+                    #print "Enviando ", line
+                    s.send(line)
 
 
     #while 1:
