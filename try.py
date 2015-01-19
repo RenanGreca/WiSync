@@ -103,15 +103,21 @@ def client():
                 if line == 'file\n':
                     s.send(line)
                     print "#partiu enviar arquivo"
-                    filename = sys.stdin.readline()[:-1]
-                    f = open(filename, "rb")
-                    blocksize = os.path.getsize(filename)
+                    filename = sys.stdin.readline()
+                    #print "enviando nome do arquivo..."
+                    #s.send(filename)
+                    f = open(filename[:-1], "rb")
+                    blocksize = os.path.getsize(filename[:-1])
                     offset = 0
+                    #print "enviando tamanho do arquivo...", str(blocksize)
+                    #s.send(str(blocksize))
+                    #print "enviando arquivo..."
                     while True:
-                        sent = sendfile(s.fileno(), f.fileno(), offset, blocksize)
+                        sent = sendfile(s.fileno(), f.fileno(), offset, 1024)
                         if sent == 0:
+                            #s.send("EOF")
                             break #EOF
-                        offset += sent
+                        offset += sent 
                     f.close()
                 else:
                     #print "Enviando ", line

@@ -84,11 +84,26 @@ class Client(threading.Thread):
             data = self.client.recv(self.size)
             if data:
                 if data == 'file\n':
+                    #print "recebendo nome do arquivo..."
+                    #filename = self.client.recv(self.size)
+                    #print "recebendo tamanho do arquivo..."
+                    #blocksize = self.client.recv(self.size)
+                    #print blocksize
+                    #running = 0
+                    #break
                     print "Recebendo arquivo..."
-                    stuff = self.client.recv(self.size)
-                    f = open("out", "w")
-                    f.write(stuff)
+                    contents = ""
+                    f = open("out.jpg", "w")
+                    while True:
+                        stuff = self.client.recv(self.size)
+                        print stuff
+                        #if stuff == "EOF":
+                        #    break
+                        #contents += stuff
+                        f.write(stuff)
                     f.close()
+                    #filename = None
+                    #blocksize = None
                 else:
                     sys.stdout.write(">")
                     sys.stdout.write(data)
