@@ -4,29 +4,73 @@
 
 import socket
 import argparse
-import pickle
+from pickle import load, dump
+from json import loads, dumps
 from os import listdir
 from os.path import isfile, join, getmtime, getctime, exists
+from time import ctime
 from datetime import datetime
 
-# Argumentos de linha de comando do programa
-parser = argparse.ArgumentParser(description='''Compara diretórios e sincroniza
-                                    arquivos.''')
-parser.add_argument('-n', '--hostname', type=str, required=True,
-                    help='Nome de rede do outro computador')
-parser.add_argument('-d', '--directory', type=str, required=True,
-                    help='''Caminho para o diretório a ser sincronizado
-                         (de preferência, use o caminho completo)''')
+class Dir():
+    def __init__(self, dir):
+        self.dir = dir
+        if not exists(self.dir):
+            exit("Diretório não existente.")
+
+        if isfile(self.dir):
+            exit("Caminho deve ser um diretório, não um arquivo.")
+
+        self.auxdir = join(self.dir, '.wisync')
+        if not exists(self.auxdir):
+            print "Novo diretório encontrado, criando arquivos auxiliares..."
+            makedirs(self.auxdir)
+        
+        if exists(join(self.auxdir, '.last_sync.pkl')):
+            # Obtém as informações da última sincronização
+            self.last_sync = load(join(self.auxdir, '.last_sync.pkl'))
+
+        self.files = self.read_dir()
+        self.remote_files = None
+
+    def read_dir(self, dir=None, level=0):
+        if dir is None:
+            dir = self.dir
+        files = {}
+
+        for f in listdir(dir):
+            datem, datec = dates(join(dir, f))
+            if isfile(join(dir, f)):
+                # Pega as datas de modificação e criação do arquivo
+                files[f] = {'type': 'f', 'datem': datem, 'datec': datec}
+            else:
+                # Pega os arquivos de dentro de um diretório recursivamente
+                files[f] = {'type': 'd', 'datem': datem, 'datec': datec,
+                               'conteudo': self.read_dir(join(dir,f), level+1)}
+
+        return files
+
+    def save(self):
+        files = self.read_dir()
+        data = dumps(files)
+        f = open(join(self.auxdir, 'last_sync.json'), 'w')
+        f.write(data)
+        f.close
+
+
+# Operações auxiliares
+def dates(f):
+    datam = datetime.fromtimestamp(getmtime(f)).isoformat()
+    datac = datetime.fromtimestamp(getctime(f)).isoformat()
+    return datam, datac
 
 # Lê informações do diretório
 def ler_dir(dir, nivel=0):
     arquivos = {}
 
     for f in listdir(dir):
+        datam, datac = datas(join(dir, f))
         if isfile(join(dir, f)):
             # Pega as datas de modificação e criação do arquivo
-            datam = datetime.fromtimestamp(getmtime(join(dir, f)))
-            datac = datetime.fromtimestamp(getctime(join(dir, f)))
             arquivos[f] = {"tipo": 'f', 'datam': datam, 'datac': datac}
         else:
             # Pega os arquivos de dentro de um diretório recursivamente
@@ -110,6 +154,3 @@ def main(args):
 
     data = c.recv(BUFFER_SIZE)
     c.close()
-
-args = parser.parse_args()
-main(args);

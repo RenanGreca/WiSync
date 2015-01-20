@@ -96,7 +96,7 @@ class Client(threading.Thread):
                     f = open("out.jpg", "w")
                     while True:
                         stuff = self.client.recv(self.size)
-                        print stuff
+                        if stuff = 
                         #if stuff == "EOF":
                         #    break
                         #contents += stuff
