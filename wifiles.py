@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 # coding=utf-8
-# UTF-8 para poder usar acentos
+
+# WiFiles.py
+# Complemento ao WiSync.py
+# Copyright (C) 2015 Renan Greca <rdmg11@inf.ufpr.com>
+
+# Usado para lidar com o diretório local
 
 import socket
 import argparse
 from pickle import load, dump
 from json import loads, dumps
 from os import listdir
-from os.path import isfile, join, getmtime, getctime, exists
+from os.path import isfile, isdir, join, getmtime, getctime, exists
 from time import ctime
 from datetime import datetime
 
@@ -17,7 +22,7 @@ class Dir():
         if not exists(self.dir):
             exit("Diretório não existente.")
 
-        if isfile(self.dir):
+        if not isdir(self.dir):
             exit("Caminho deve ser um diretório, não um arquivo.")
 
         self.auxdir = join(self.dir, '.wisync')

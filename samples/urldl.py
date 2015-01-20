@@ -33,6 +33,15 @@ def chunk_read(response, filename, chunk_size=8192, report_hook=None):
    return bytes_so_far
 
 if __name__ == '__main__':
-   response = urllib2.urlopen('http://192.168.1.132:8080/b.m4a');
-   chunk_read(response, 'b.m4a', report_hook=chunk_report)
 
+    for i in range(2, 254):
+        addr = 'http://192.168.1.%i:8080/b.m4a' % i
+        sys.stdout.write("\rBuscando host... %d/254" % i)
+        sys.stdout.flush()
+        try:
+            response = urllib2.urlopen(addr, timeout=0.01);
+            sys.stdout.write("\n")
+            chunk_read(response, 'b.m4a', report_hook=chunk_report)
+            break
+        except Exception, e:
+            pass
