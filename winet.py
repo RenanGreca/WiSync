@@ -12,6 +12,10 @@ import socket
 import sys
 import urllib2
 
+from os.path import join
+
+from time import sleep
+
 from woof import serve_files
 
 class Net():
@@ -29,31 +33,53 @@ class Net():
             else:
                 self.remote_addr = socket.gethostbyname(hostname+'.local')
 
-    def client(self):
+    def client(self, direc, again=False):
+        filename = 'files.json'
+        data = None
         if self.remote_addr is not None:
-            response = urllib2.urlopen('http://'+hostname+':8080/b.m4a', timeout=0.01);
-            data = chunk_read(response, 'files.json', report_hook=chunk_report)
+            try:
+                response = urllib2.urlopen('http://'+self.remote_addr+':8080/'+filename, timeout=0.1);
+                data = chunk_read(response, filename, report_hook=chunk_report)
+            except Exception:
+                print "Servidor não encontrado"
+                pass
         else:
-            data = self.findserver()
-        f = open("/Users/renangreca/arqs/a.m4a", "w")
-        f.write(data)
-        f.close
+            data = self.findserver(filename)
+        if data is None:
+            if not again:
+                self.serve(direc)
+                sleep(1)
+                self.client(direc, again=True)
+        else:
+            f = open(join(direc.auxdir, 'rfiles.json'), "w")
+            f.write(data)
+            f.close()
+            if not again:
+                self.serve(direc)
+            # Fazer resto da parte cliente
 
-    def findserver(self):
+    def findserver(self, filename):
         ips = self.ip.split('.')
         for i in range(2, 254):
             host = ips[0]+'.'+ips[1]+'.'+ips[2]+'.'+str(i)
 
-            addr = 'http://%s:8080/b.m4a' % host
-            sys.stdout.write("\rBuscando host... %s" % host)
+            addr = 'http://%s:8080/%s' % (host, filename)
+            sys.stdout.write("\rBuscando arquivo... %s" % addr)
             sys.stdout.flush()
             try:
                 response = urllib2.urlopen(addr, timeout=0.01);
                 sys.stdout.write("\n")
-                return chunk_read(response, 'files.json', report_hook=chunk_report)
-            except Exception, e:
+                return chunk_read(response, filename, report_hook=chunk_report)
+            except Exception:
                 pass
-        print "Deu pau"
+        print "Servidor não encontrado"
+        return None
+
+    def serve(self, direc):
+        filename = join(direc.auxdir, 'files.json')
+        print "Hospedando arquivo", filename
+        serve_files(filename, maxdown=1, ip_addr='', port=8080)
+
 
 # funções auxiliares
 def chunk_report(bytes_so_far, chunk_size, total_size, filename):
@@ -63,6 +89,7 @@ def chunk_report(bytes_so_far, chunk_size, total_size, filename):
 
     if bytes_so_far >= total_size:
         sys.stdout.write('\n')
+
 
 def chunk_read(response, filename, chunk_size=8192, report_hook=None):
     total_size = response.info().getheader('Content-Length').strip()
@@ -88,4 +115,4 @@ def chunk_read(response, filename, chunk_size=8192, report_hook=None):
 
     return data
 
-#serve_files ('a.jpg', maxdown=1, ip_addr='', port=8080)
+# serve_files ('a.jpg', maxdown=1, ip_addr='', port=8080)

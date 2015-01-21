@@ -11,14 +11,15 @@ import socket
 import argparse
 from pickle import load, dump
 from json import loads, dumps
-from os import listdir
+from os import listdir, makedirs
 from os.path import isfile, isdir, join, getmtime, getctime, exists
 from time import ctime
 from datetime import datetime
 
+
 class Dir():
-    def __init__(self, dir):
-        self.dir = dir
+    def __init__(self, direc):
+        self.dir = direc
         if not exists(self.dir):
             exit("Diretório não existente.")
 
@@ -35,22 +36,27 @@ class Dir():
             self.last_sync = load(join(self.auxdir, '.last_sync.pkl'))
 
         self.files = self.read_dir()
+        data = dumps(self.files)
+        f = open(join(self.auxdir, 'files.json'), 'w')
+        f.write(data)
+        f.close()
+
         self.remote_files = None
 
-    def read_dir(self, dir=None, level=0):
-        if dir is None:
-            dir = self.dir
+    def read_dir(self, direc=None, level=0):
+        if direc is None:
+            direc = self.dir
         files = {}
 
-        for f in listdir(dir):
-            datem, datec = dates(join(dir, f))
-            if isfile(join(dir, f)):
+        for f in listdir(direc):
+            datem, datec = dates(join(direc, f))
+            if isfile(join(direc, f)):
                 # Pega as datas de modificação e criação do arquivo
                 files[f] = {'type': 'f', 'datem': datem, 'datec': datec}
             else:
                 # Pega os arquivos de dentro de um diretório recursivamente
                 files[f] = {'type': 'd', 'datem': datem, 'datec': datec,
-                               'conteudo': self.read_dir(join(dir,f), level+1)}
+                               'conteudo': self.read_dir(join(direc,f), level+1)}
 
         return files
 
@@ -59,7 +65,7 @@ class Dir():
         data = dumps(files)
         f = open(join(self.auxdir, 'last_sync.json'), 'w')
         f.write(data)
-        f.close
+        f.close()
 
 
 # Operações auxiliares
@@ -68,45 +74,48 @@ def dates(f):
     datac = datetime.fromtimestamp(getctime(f)).isoformat()
     return datam, datac
 
+
 # Lê informações do diretório
-def ler_dir(dir, nivel=0):
+def ler_dir(direc, nivel=0):
     arquivos = {}
 
-    for f in listdir(dir):
-        datam, datac = datas(join(dir, f))
-        if isfile(join(dir, f)):
+    for f in listdir(direc):
+        datam, datac = dates(join(direc, f))
+        if isfile(join(direc, f)):
             # Pega as datas de modificação e criação do arquivo
             arquivos[f] = {"tipo": 'f', 'datam': datam, 'datac': datac}
         else:
             # Pega os arquivos de dentro de um diretório recursivamente
             arquivos[f] = {'tipo': 'd', 'datam': datam, 'datac': datac,
-                           'conteudo': ler_dir(join(dir,f), nivel+1)}
+                           'conteudo': ler_dir(join(direc,f), nivel+1)}
 
     return arquivos
 
+
 # Compara o diretório atual com o armazenado no pkl
 # e toma as decisões adequadas.
-def compara_dirs(dir, dir_atual, dir_anterior):
+def compara_dirs(direc, dir_atual, dir_anterior):
     modificados = {}
     adicionados = {}
 
     for nome, arquivo in dir_atual.iteritems():
-        if isfile(join(dir, nome)):
-            if (nome in dir_anterior):
-                if (dir_atual[nome]['datam'] != dir_anterior[nome]['datam']):
+        if isfile(join(direc, nome)):
+            if nome in dir_anterior:
+                if dir_atual[nome]['datam'] != dir_anterior[nome]['datam']:
                     modificados[nome] = dir_atual[nome]
             else:
                 adicionados[nome] = dir_atual[nome]
         else:
-            modificados[nome], adicionados[nome] = compara_dirs(join(dir, nome), arquivo['conteudo'], dir_anterior)
+            modificados[nome], adicionados[nome] = compara_dirs(join(direc, nome), arquivo['conteudo'], dir_anterior)
 
     return modificados, adicionados
+
 
 def main(args):
 
     dir_atual = ler_dir(args.directory)
 
-    if (exists(join(args.directory, '.sync.pkl'))):
+    if exists(join(args.directory, '.sync.pkl')):
         dir_anterior = pickle.load(open(join(args.directory, '.sync.pkl')))
 
     pickle.dump(dir_atual, open(join(args.directory, '.sync.pkl'), 'w'))
