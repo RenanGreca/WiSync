@@ -29,15 +29,19 @@ parser.add_argument('-s', '--server', default=False, const=True, action='store_c
 
 
 def main(args):
+    # Prepara o gerenciador de arquivos
     direc = Dir(abspath(args.directory))
 
+    # Prepara o gerenciador de rede
     net = Net(args.hostname)
 
+    # O argumento -s força o modo servidor
     if args.server:
         net.server(direc)
     else:
         net.client(direc)
 
+    # Salva os dados no diretório para a próxima sincronização
     direc.save()
 
 if __name__ == '__main__':

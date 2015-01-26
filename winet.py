@@ -18,8 +18,16 @@ from time import sleep
 
 from woof import serve_files
 
+
 class Net():
     def __init__(self, hostname=None):
+        """ Classe usada para gerenciar a parte em rede do WiSync.
+
+        :: PARAMS ::
+        :str hostname:
+            Nome de rede de um computador rodando outra instância do WiSync.
+            (padrão: None)
+        """
         self.host = socket.gethostname()
         if self.host.endswith('.local'):
             self.ip = socket.gethostbyname(self.host)
@@ -34,8 +42,21 @@ class Net():
                 self.remote_addr = socket.gethostbyname(hostname+'.local')
 
     def client(self, direc, again=False):
+        """ Parte de cliente do programa.
+            Usado quando o programa estiver recebendo arquivos da outra instância.
+
+        :: PARAMS ::
+        :str direc:
+            Diretório sendo usado pelo WiSync.
+
+        :bool again:
+            Usado para evitar recursões.
+            (padrão: False)
+        """
         filename = 'files.json'
         data = None
+
+        print "Endereço remoto:",self.remote_addr
         if self.remote_addr is not None:
             try:
                 response = urllib2.urlopen('http://'+self.remote_addr+':8080/'+filename, timeout=0.1);
@@ -56,9 +77,21 @@ class Net():
             f.close()
             if not again:
                 self.serve(direc)
-            # Fazer resto da parte cliente
+            # TODO Fazer resto da parte cliente
 
-    def findserver(self, filename):
+    def findserver(self, filename='files.json'):
+        """ Usado para encontrar uma outra instância do programa na rede local.
+
+        :: PARAMS ::
+        :str filename:
+            Nome do arquivo a ser encontrado no outro servidor.
+            (padrão: 'files.json')
+
+        :: RETURNS ::
+        Uma variável contendo:
+            O conteúdo do arquivo, se a função for bem-sucedida.
+            None, se der algo errado.
+        """
         ips = self.ip.split('.')
         for i in range(2, 254):
             host = ips[0]+'.'+ips[1]+'.'+ips[2]+'.'+str(i)
@@ -83,6 +116,21 @@ class Net():
 
 # funções auxiliares
 def chunk_report(bytes_so_far, chunk_size, total_size, filename):
+    """ Mostra o progresso durante o download de um arquivo.
+
+    :: PARAMS ::
+    :int bytes_so_far:
+        Quantidade de bytes já baixados.
+
+    :int chunk_size:
+        Tamanho de cada bloco em bytes.
+
+    :int total_size:
+        Tamanho total do arquivo em bytes.
+
+    :str filename:
+        Nome do arquivo.
+    """
     percent = float(bytes_so_far) / total_size
     percent = round(percent*100, 2)
     sys.stdout.write("Baixando arquivo %s (%0.2f%%)\r" % (filename, percent))
@@ -92,6 +140,26 @@ def chunk_report(bytes_so_far, chunk_size, total_size, filename):
 
 
 def chunk_read(response, filename, chunk_size=8192, report_hook=None):
+    """ Baixa um arquivo em blocos para poder exibir o progresso.
+
+    :: PARAMS ::
+    :http response:
+        Resposta HTTP resultante de um urllib2.urlopen().
+
+    :str filename:
+        Nome do arquivo.
+
+    :int chunk_size:
+        Tamanho de cada bloco em bytes.
+
+    :func report_hook:
+        Função a ser chamada após cada bloco ser lido.
+        (padrão: None)
+
+    :: RETURNS ::
+    Uma variável contendo:
+        Os dados do arquivo recebido.
+    """
     total_size = response.info().getheader('Content-Length').strip()
     total_size = int(total_size)
     bytes_so_far = 0

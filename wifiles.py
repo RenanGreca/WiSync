@@ -19,12 +19,18 @@ from datetime import datetime
 
 class Dir():
     def __init__(self, direc):
+        """ Classe usada para gerenciar a parte de arquivos do WiSync.
+
+        :: PARAMS ::
+        :str direc:
+            Caminho para o diretório a ser usado.
+        """
         self.dir = direc
         if not exists(self.dir):
             exit("Diretório não existente.")
 
         if not isdir(self.dir):
-            exit("Caminho deve ser um diretório, não um arquivo.")
+            exit("Caminho deve ser um diretório.")
 
         self.auxdir = join(self.dir, '.wisync')
         if not exists(self.auxdir):
@@ -44,6 +50,23 @@ class Dir():
         self.remote_files = None
 
     def read_dir(self, direc=None, level=0):
+        """ Lê um diretório e armazena informações sobre os arquivos contidos nele.
+
+        :: PARAMS ::
+        :str direc:
+            Diretório a ser lido.
+            Se for None, o diretório da classe é usado.
+            (padrão: None)
+
+        :int level:
+            Nível da recursão para subdiretórios.
+            (padrão: 0)
+
+        :: RETURNS ::
+        Dicionário contendo:
+            Todos os arquivos do diretório e dos subdiretórios.
+        """
+
         if direc is None:
             direc = self.dir
         files = {}
@@ -54,6 +77,9 @@ class Dir():
                 # Pega as datas de modificação e criação do arquivo
                 files[f] = {'type': 'f', 'datem': datem, 'datec': datec}
             else:
+                if (join(direc, f)) == self.auxdir:
+                    # Pula diretório de dados do WiSync
+                    continue
                 # Pega os arquivos de dentro de um diretório recursivamente
                 files[f] = {'type': 'd', 'datem': datem, 'datec': datec,
                                'conteudo': self.read_dir(join(direc,f), level+1)}
@@ -61,6 +87,10 @@ class Dir():
         return files
 
     def save(self):
+        """
+        Salva a situação atual do diretório num arquivo para referência futura.
+        Normalmente será a última coisa a ser chamada no programa.
+        """
         files = self.read_dir()
         data = dumps(files)
         f = open(join(self.auxdir, 'last_sync.json'), 'w')
@@ -70,9 +100,22 @@ class Dir():
 
 # Operações auxiliares
 def dates(f):
-    datam = datetime.fromtimestamp(getmtime(f)).isoformat()
-    datac = datetime.fromtimestamp(getctime(f)).isoformat()
-    return datam, datac
+    """ Pega as datas e horas de criação e modificação de um arquivo.
+        As datas são retornadas em formato ISO.
+        Ex: 2015-01-21T19:08:34.987381
+
+    :: PARAMS ::
+    :file f:
+        Arquivo cujas datas serão lidas.
+
+    :: RETURNS ::
+    Tupla contendo:
+        Data de modificação do arquivo.
+        Data de criação do arquivo.
+    """
+    datem = datetime.fromtimestamp(getmtime(f)).isoformat()
+    datec = datetime.fromtimestamp(getctime(f)).isoformat()
+    return datem, datec
 
 
 # Lê informações do diretório
