@@ -38,8 +38,11 @@ class Net():
         if hostname is not None:
             if hostname.endswith('.local'):
                 self.remote_addr = socket.gethostbyname(hostname)
+
             else:
                 self.remote_addr = socket.gethostbyname(hostname+'.local')
+
+        self.isServer = False
 
     def client(self, direc, again=False):
         """ Parte de cliente do programa.
@@ -59,7 +62,7 @@ class Net():
         print "Endereço remoto:",self.remote_addr
         if self.remote_addr is not None:
             try:
-                response = urllib2.urlopen('http://'+self.remote_addr+':8080/'+filename, timeout=0.1);
+                response = urllib2.urlopen('http://'+self.remote_addr+':8080/'+filename, timeout=0.5);
                 data = chunk_read(response, filename, report_hook=chunk_report)
             except Exception:
                 print "Servidor não encontrado"
@@ -68,10 +71,14 @@ class Net():
             data = self.findserver(filename)
         if data is None:
             if not again:
+                self.isServer = True
                 self.serve(direc)
-                sleep(1)
+                sleep(2)
+                print "Hi!", self.isServer, again
                 self.client(direc, again=True)
         else:
+            print "Arquivo recebido. Salvando em rfiles.json"
+            print self.isServer
             f = open(join(direc.auxdir, 'rfiles.json'), "w")
             f.write(data)
             f.close()

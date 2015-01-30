@@ -36,10 +36,10 @@ def main(args):
     net = Net(args.hostname)
 
     # O argumento -s força o modo servidor
-    if args.server:
-        net.server(direc)
-    else:
-        net.client(direc)
+    # if args.server:
+    #    net.server(direc)
+    # else:
+    net.client(direc)
 
     # Salva os dados no diretório para a próxima sincronização
     direc.save()
