@@ -11,6 +11,8 @@
 import socket
 import sys
 import urllib2
+import errno
+import traceback
 
 from os.path import join
 
@@ -19,7 +21,7 @@ from time import sleep
 from woof import serve_files
 
 
-class Net():
+class WiNet():
     def __init__(self, hostname=None):
         """ Classe usada para gerenciar a parte em rede do WiSync.
 
@@ -44,7 +46,7 @@ class Net():
 
         self.isServer = False
 
-    def client(self, direc, again=False):
+    def client(self, direc):
         """ Parte de cliente do programa.
             Usado quando o programa estiver recebendo arquivos da outra instância.
 
@@ -59,30 +61,35 @@ class Net():
         filename = 'files.json'
         data = None
 
-        print "Endereço remoto:",self.remote_addr
         if self.remote_addr is not None:
             try:
-                response = urllib2.urlopen('http://'+self.remote_addr+':8080/'+filename, timeout=0.5);
+                response = urllib2.urlopen('http://'+self.remote_addr+':8080/'+filename, timeout=1)
                 data = chunk_read(response, filename, report_hook=chunk_report)
-            except Exception:
+            except urllib2.HTTPError, e:
+                print 'HTTPError = ' + str(e.code)
+            except urllib2.URLError, e:
+                #print 'URLError = ' + str(e.reason)
                 print "Servidor não encontrado"
                 pass
+            except Exception as e:
+                if e.errno == 104:
+                    pass
+                else:
+                    print 'Erro: ' + traceback.format_exc()
+
         else:
             data = self.findserver(filename)
+
         if data is None:
-            if not again:
+            if not self.isServer:
                 self.isServer = True
                 self.serve(direc)
-                sleep(2)
-                print "Hi!", self.isServer, again
-                self.client(direc, again=True)
         else:
             print "Arquivo recebido. Salvando em rfiles.json"
-            print self.isServer
             f = open(join(direc.auxdir, 'rfiles.json'), "w")
             f.write(data)
             f.close()
-            if not again:
+            if not self.isServer:
                 self.serve(direc)
             # TODO Fazer resto da parte cliente
 
@@ -107,18 +114,21 @@ class Net():
             sys.stdout.write("\rBuscando arquivo... %s" % addr)
             sys.stdout.flush()
             try:
-                response = urllib2.urlopen(addr, timeout=0.01);
+                response = urllib2.urlopen(addr, timeout=0.01)
                 sys.stdout.write("\n")
                 return chunk_read(response, filename, report_hook=chunk_report)
             except Exception:
                 pass
-        print "Servidor não encontrado"
+        print "Servidor não encontrado115"
         return None
 
     def serve(self, direc):
         filename = join(direc.auxdir, 'files.json')
         print "Hospedando arquivo", filename
         serve_files(filename, maxdown=1, ip_addr='', port=8080)
+        if self.isServer:
+            sleep(1)
+            self.client(direc)
 
 
 # funções auxiliares

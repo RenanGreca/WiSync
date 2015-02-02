@@ -13,8 +13,8 @@ from os.path import isfile, join, getmtime, getctime, exists, abspath
 from sys import exit
 
 # Bibliotecas do projeto
-from wifiles import Dir
-from winet import Net
+from wifiles import WiFiles
+from winet import WiNet
 
 parser = argparse.ArgumentParser(description='''Compara diretórios e sincroniza
                                     arquivos.''')
@@ -30,10 +30,10 @@ parser.add_argument('-s', '--server', default=False, const=True, action='store_c
 
 def main(args):
     # Prepara o gerenciador de arquivos
-    direc = Dir(abspath(args.directory))
+    direc = WiFiles(abspath(args.directory))
 
     # Prepara o gerenciador de rede
-    net = Net(args.hostname)
+    net = WiNet(args.hostname)
 
     # O argumento -s força o modo servidor
     # if args.server:

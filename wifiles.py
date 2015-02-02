@@ -8,16 +8,14 @@
 # Usado para lidar com o diretório local
 
 import socket
-import argparse
-from pickle import load, dump
-from json import loads, dumps
+from pickle import load
+from json import dumps
 from os import listdir, makedirs
 from os.path import isfile, isdir, join, getmtime, getctime, exists
-from time import ctime
 from datetime import datetime
 
 
-class Dir():
+class WiFiles():
     def __init__(self, direc):
         """ Classe usada para gerenciar a parte de arquivos do WiSync.
 
@@ -42,7 +40,7 @@ class Dir():
             self.last_sync = load(join(self.auxdir, '.last_sync.pkl'))
 
         self.files = self.read_dir()
-        data = dumps(self.files)
+        data = dumps(self.files.dict())
         f = open(join(self.auxdir, 'files.json'), 'w')
         f.write(data)
         f.close()
@@ -69,20 +67,25 @@ class Dir():
 
         if direc is None:
             direc = self.dir
-        files = {}
+        # files = {}
+
+        datem, datec = dates(direc)
+        files = File(direc, datem, datec, isDir=True)
 
         for f in listdir(direc):
             datem, datec = dates(join(direc, f))
             if isfile(join(direc, f)):
                 # Pega as datas de modificação e criação do arquivo
-                files[f] = {'type': 'f', 'datem': datem, 'datec': datec}
+                files.add_file(File(f, datem, datec))
+                # files[f] = {'type': 'f', 'datem': datem, 'datec': datec}
             else:
                 if (join(direc, f)) == self.auxdir:
                     # Pula diretório de dados do WiSync
                     continue
                 # Pega os arquivos de dentro de um diretório recursivamente
-                files[f] = {'type': 'd', 'datem': datem, 'datec': datec,
-                               'conteudo': self.read_dir(join(direc,f), level+1)}
+                files.add_file(self.read_dir(join(direc, f), level+1))
+                # files[f] = {'type': 'd', 'datem': datem, 'datec': datec,
+                #               'conteudo': self.read_dir(join(direc,f), level+1)}
 
         return files
 
@@ -92,11 +95,36 @@ class Dir():
         Normalmente será a última coisa a ser chamada no programa.
         """
         files = self.read_dir()
-        data = dumps(files)
+        data = dumps(files.dict())
         f = open(join(self.auxdir, 'last_sync.json'), 'w')
         f.write(data)
         f.close()
 
+
+class File():
+
+    def __init__(self, name, datem, datec, isDir=False):
+        self.name = name
+        self.datem = datem
+        self.datec = datec
+        self.isDir = isDir
+        if self.isDir:
+            self.files = []
+
+    def add_file(self, f):
+        if not self.isDir:
+            print "Objeto não é um diretório"
+            return
+        self.files.append(f)
+
+    def dict(self):
+        d = self.__dict__
+        if self.isDir:
+            files = []
+            for f in self.files:
+                files.append(f.dict())
+            d['files'] = files
+        return d
 
 # Operações auxiliares
 def dates(f):
