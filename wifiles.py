@@ -35,12 +35,13 @@ class WiFiles():
             print "Novo diretório encontrado, criando arquivos auxiliares..."
             makedirs(self.auxdir)
         
-        if exists(join(self.auxdir, '.last_sync.pkl')):
-            # Obtém as informações da última sincronização
-            self.last_sync = load(join(self.auxdir, '.last_sync.pkl'))
+        #if exists(join(self.auxdir, '.last_sync.pkl')):
+        #    # Obtém as informações da última sincronização
+        #    self.last_sync = load(join(self.auxdir, '.last_sync.pkl'))
 
         self.files = self.read_dir()
         data = dumps(self.files.dict())
+        # Saves current status of files into files.json
         f = open(join(self.auxdir, 'files.json'), 'w')
         f.write(data)
         f.close()
@@ -147,7 +148,7 @@ def dates(f):
 
 
 # Lê informações do diretório
-def ler_dir(direc, nivel=0):
+def read_dir(direc, nivel=0):
     arquivos = {}
 
     for f in listdir(direc):
@@ -158,14 +159,14 @@ def ler_dir(direc, nivel=0):
         else:
             # Pega os arquivos de dentro de um diretório recursivamente
             arquivos[f] = {'tipo': 'd', 'datam': datam, 'datac': datac,
-                           'conteudo': ler_dir(join(direc,f), nivel+1)}
+                           'conteudo': read_dir(join(direc,f), nivel+1)}
 
     return arquivos
 
 
 # Compara o diretório atual com o armazenado no pkl
 # e toma as decisões adequadas.
-def compara_dirs(direc, dir_atual, dir_anterior):
+def compare_dirs(direc, dir_atual, dir_anterior):
     modificados = {}
     adicionados = {}
 
@@ -177,21 +178,21 @@ def compara_dirs(direc, dir_atual, dir_anterior):
             else:
                 adicionados[nome] = dir_atual[nome]
         else:
-            modificados[nome], adicionados[nome] = compara_dirs(join(direc, nome), arquivo['conteudo'], dir_anterior)
+            modificados[nome], adicionados[nome] = compare_dirs(join(direc, nome), arquivo['conteudo'], dir_anterior)
 
     return modificados, adicionados
 
 
 def main(args):
 
-    dir_atual = ler_dir(args.directory)
+    dir_atual = read_dir(args.directory)
 
-    if exists(join(args.directory, '.sync.pkl')):
-        dir_anterior = pickle.load(open(join(args.directory, '.sync.pkl')))
+    #if exists(join(args.directory, '.sync.pkl')):
+    #    dir_anterior = pickle.load(open(join(args.directory, '.sync.pkl')))
 
-    pickle.dump(dir_atual, open(join(args.directory, '.sync.pkl'), 'w'))
+    #pickle.dump(dir_atual, open(join(args.directory, '.sync.pkl'), 'w'))
 
-    mudancas = compara_dirs(args.directory, dir_atual, dir_anterior)
+    mudancas = compare_dirs(args.directory, dir_atual, dir_anterior)
 
     print 'Dir atual: ',dir_atual
     print 'Dir anterior',dir_anterior
@@ -232,8 +233,9 @@ def main(args):
         message = raw_input('Here: ')
         c.send(message)
         data = conn.recv(BUFFER_SIZE)
-        if not data: break
-        print "There: ", data
+        if not data:
+            break
+        print "There: ", datas
         conn.send(data)  # echo
     conn.close()
 

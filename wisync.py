@@ -6,6 +6,7 @@
 
 # Bibliotecas auxiliares
 import argparse
+import threading
 
 from os import listdir, makedirs
 from os.path import isfile, join, getmtime, getctime, exists, abspath
@@ -37,9 +38,10 @@ def main(args):
 
     # O argumento -s força o modo servidor
     # if args.server:
-    #    net.server(direc)
+    #
     # else:
-    net.client(direc)
+    client = threading.Thread(target=net.client(direc))
+    server = threading.Thread(target=net.server(direc))
 
     # Salva os dados no diretório para a próxima sincronização
     direc.save()

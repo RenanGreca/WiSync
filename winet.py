@@ -20,7 +20,6 @@ from time import sleep
 
 from woof import serve_files
 
-
 class WiNet():
     def __init__(self, hostname=None):
         """ Classe usada para gerenciar a parte em rede do WiSync.
@@ -45,6 +44,8 @@ class WiNet():
                 self.remote_addr = socket.gethostbyname(hostname+'.local')
 
         self.isServer = False
+        self.username = "WiSync"
+        self.password = "WiSync"
 
     def client(self, direc):
         """ Parte de cliente do programa.
@@ -66,16 +67,16 @@ class WiNet():
                 response = urllib2.urlopen('http://'+self.remote_addr+':8080/'+filename, timeout=1)
                 data = chunk_read(response, filename, report_hook=chunk_report)
             except urllib2.HTTPError, e:
-                print 'HTTPError = ' + str(e.code)
+                print '[C] HTTPError = ' + str(e.code)
             except urllib2.URLError, e:
                 #print 'URLError = ' + str(e.reason)
-                print "Servidor não encontrado"
+                print "[C] Servidor não encontrado"
                 pass
             except Exception as e:
                 if e.errno == 104:
                     pass
                 else:
-                    print 'Erro: ' + traceback.format_exc()
+                    print '[C] Erro: ' + traceback.format_exc()
 
         else:
             data = self.findserver(filename)
@@ -85,12 +86,12 @@ class WiNet():
                 self.isServer = True
                 self.serve(direc)
         else:
-            print "Arquivo recebido. Salvando em rfiles.json"
+            print "[C] Arquivo recebido. Salvando em rfiles.json"
             f = open(join(direc.auxdir, 'rfiles.json'), "w")
             f.write(data)
             f.close()
-            if not self.isServer:
-                self.serve(direc)
+            #if not self.isServer:
+            #    self.serve(direc)
             # TODO Fazer resto da parte cliente
 
     def findserver(self, filename='files.json'):
@@ -103,7 +104,6 @@ class WiNet():
 
         :: RETURNS ::
         Uma variável contendo:
-            O conteúdo do arquivo, se a função for bem-sucedida.
             None, se der algo errado.
         """
         ips = self.ip.split('.')
@@ -130,6 +130,10 @@ class WiNet():
             sleep(1)
             self.client(direc)
 
+    def server(self, direc):
+        filename = join(direc.auxdir, 'files.json')
+        print "[S] Hospedando arquivo", filename
+        serve_files(filename, maxdown=1, ip_addr='', port=8080)
 
 # funções auxiliares
 def chunk_report(bytes_so_far, chunk_size, total_size, filename):
