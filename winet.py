@@ -81,12 +81,10 @@ class WiNet():
         else:
             data = self.findserver(filename)
 
-        if data is None:
-            if not self.isServer:
-                self.isServer = True
-                self.serve(direc)
-        else:
-            print "[C] Arquivo recebido. Salvando em rfiles.json"
+        #if not self.isServer:
+        #    self.isServer = True
+        #    self.serve(direc)
+        if data is not None:
             f = open(join(direc.auxdir, 'rfiles.json'), "w")
             f.write(data)
             f.close()
