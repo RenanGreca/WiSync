@@ -28,20 +28,30 @@ parser.add_argument('-n', '--hostname', type=str, required=False,
 parser.add_argument('-s', '--server', default=False, const=True, action='store_const',
                     help='''Forçar modo servidor''')
 
-
 def main(args):
     # Prepara o gerenciador de arquivos
     direc = WiFiles(abspath(args.directory))
 
     # Prepara o gerenciador de rede
-    net = WiNet(args.hostname)
-
     # O argumento -s força o modo servidor
-    # if args.server:
+    if args.server:
+        net = WiNet(direc, args.hostname, True)
+        net.server()
+    else:
+        net = WiNet(direc, args.hostname, False)
+        net.client()
+
+    #server = threading.Thread(target=hello)
+    #client = threading.Thread(target=net.client(direc))
+
+    # server = threading.Thread(target=net.server)
+    # client = threading.Thread(target=net.client)
     #
-    # else:
-    client = threading.Thread(target=net.client(direc))
-    server = threading.Thread(target=net.server(direc))
+    # server.start()
+    # client.start()
+    #
+    # server.join()
+    # client.join()
 
     # Salva os dados no diretório para a próxima sincronização
     direc.save()

@@ -38,6 +38,7 @@ TM = object
 cpid = -1
 compressed = 'gz'
 upload = False
+cli_addr = ''
 
 
 class EvilZipStreamWrapper(TM):
@@ -121,6 +122,9 @@ def find_ip ():
 class ForkingHTTPServer (BaseHTTPServer.HTTPServer):
    def process_request(self, request, client_address):
       self.finish_request (request, client_address)
+      #print client_address[0]
+      global cli_addr
+      cli_addr = client_address[0]
       self.close_request (request)
 
 
@@ -137,8 +141,8 @@ class FileServHTTPRequestHandler (BaseHTTPServer.BaseHTTPRequestHandler):
    filename = "."
 
    def log_request (self, code='-', size='-'):
-      if code == 200:
-         BaseHTTPServer.BaseHTTPRequestHandler.log_request (self, code, size)
+        if code == 200:
+            BaseHTTPServer.BaseHTTPRequestHandler.log_request (self, code, size)
 
 
    def do_POST (self):
@@ -366,7 +370,8 @@ def serve_files (filename, maxdown = 1, ip_addr = '', port = 8080):
    while cpid != 0 and maxdownloads > 0:
       httpd.handle_request ()
 
-
+   global cli_addr
+   return cli_addr
 
 def usage (defport, defmaxdown, errmsg = None):
    name = os.path.basename (sys.argv[0])
