@@ -9,7 +9,7 @@
 
 import socket
 from pickle import load
-from json import dumps
+import json
 from os import listdir, makedirs
 from os.path import isfile, isdir, join, getmtime, getctime, exists
 from datetime import datetime
@@ -40,7 +40,7 @@ class WiFiles():
         #    self.last_sync = load(join(self.auxdir, '.last_sync.pkl'))
 
         self.files = self.read_dir()
-        data = dumps(self.files.dict())
+        data = json.dumps(self.files.dict())
         # Saves current status of files into files.json
         f = open(join(self.auxdir, 'files.json'), 'w')
         f.write(data)
@@ -90,13 +90,59 @@ class WiFiles():
 
         return files
 
+    # Compara o diretório atual com o armazenado no pkl
+    # e toma as decisões adequadas.
+    def compare_dirs(self, dir_a=None, dir_b=None, dir_c=None, level=0):
+        modified = {}
+        added = {}
+
+        a_to_b = {}
+        b_to_a = {}
+
+        # Dir A é o JSON contendo informações do diretório local
+        if dir_a is None:
+            try:
+                dir_a = json.load(join(self.auxdir, 'files.json'))
+            except Exception:
+                print "[F] files.json não encontrado!"
+
+        # Dir B é o JSON contendo informações do diretório remoto
+        if dir_b is None:
+            try:
+                dir_b = json.load(join(self.auxdir, 'rfiles.json'))
+            except Exception:
+                print "[F] rfiles.json não encontrado!"
+
+        # Dir C é o JSON contendo informações do estado do diretório após a última sincronização
+        if dir_c is None:
+            try:
+                dir_c = json.load(join(self.auxdir, 'last_sync.json'))
+            except Exception:
+                print "[F] last_sync.json não encontrado!"
+
+
+
+        """
+        for , arquivo in dir_atual.iteritems():
+            if isfile(join(direc, nome)):
+                if nome in dir_anterior:
+                    if dir_atual[nome]['datam'] != dir_anterior[nome]['datam']:
+                        modificados[nome] = dir_atual[nome]
+                else:
+                    adicionados[nome] = dir_atual[nome]
+            else:
+                modificados[nome], adicionados[nome] = compare_dirs(join(direc, nome), arquivo['conteudo'], dir_anterior)
+
+        return modificados, adicionados
+        """
+
     def save(self):
         """
         Salva a situação atual do diretório num arquivo para referência futura.
         Normalmente será a última coisa a ser chamada no programa.
         """
         files = self.read_dir()
-        data = dumps(files.dict())
+        data = json.dumps(files.dict())
         f = open(join(self.auxdir, 'last_sync.json'), 'w')
         f.write(data)
         f.close()

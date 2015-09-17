@@ -14,6 +14,8 @@ import urllib2
 import errno
 import traceback
 
+from wifiles import WiFiles
+
 from os.path import join
 
 from time import sleep
@@ -55,7 +57,7 @@ class WiNet():
         print "[S] Terminou de hospedar arquivo"
 
         sleep(1)
-        self.remote_file('files.json')
+        self.client()
 
     def client(self):
         """ Parte de cliente do programa.
@@ -75,12 +77,15 @@ class WiNet():
         #if not self.isServer:
         #    self.isServer = True
         #    self.serve(direc)
+        print data
         if data is not None:
             f = open(join(self.direc.auxdir, 'rfiles.json'), "w")
             f.write(data)
             f.close()
-            #if not self.isServer:
-            self.serve(self.direc)
+            if not self.isServer:
+                self.serve(self.direc)
+            else:
+                self.compare_dirs()
             # TODO Fazer resto da parte cliente
 
     def remote_file(self, filename):
@@ -142,6 +147,10 @@ class WiNet():
         #if self.isServer:
         #    sleep(1)
         #    self.client(direc)
+
+    def compare_dirs(self):
+        direc = WiFiles(self.direc)
+        direc.compare_dirs()
 
 # funções auxiliares
 def chunk_report(bytes_so_far, chunk_size, total_size, filename):
