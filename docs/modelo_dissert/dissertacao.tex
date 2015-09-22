@@ -3,8 +3,11 @@
 % \usepackage[portuges,brazil]{babel}
 % \usepackage[portuguese,brazil]{babel}
 
-\usepackage[brazil]{babel}
+\usepackage[brazilian]{babel}
 \usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+%\usepackage[brazil]{babel}
+%\usepackage[latin1]{inputenc}
 \usepackage{amssymb,amsmath}
 \usepackage{epsfig}
 \usepackage{multirow}
@@ -23,13 +26,13 @@
 \setcounter{secnumdepth}{3}    % n - numero de niveis de subsubsection numeradas
 \setcounter{tocdepth}{3}       % coloca ate o nivel n no sumario
 
-\title{LAN para Sincronização de Diretórios}
+\title{WiSync: Sincronização de Diretórios em LAN}
 \author{Renan Domingos Merlin Greca}
 \advisortitle{Orientador} % ou Orientador
 \advisorname{Prof. Dr. Luiz Carlos P. Albini}
 \advisorplace{Departamento de Informática, UFPR}  % departamento, instituicao
 \city{Curitiba}
-\year{2014}
+\year{2015}
 
 %\banca        % nao insira o nome do orientador, ja eh feito automaticamente
 %{Prof. Dr. Luciano Fontoura}{Instituto de Física, USP}
@@ -43,8 +46,8 @@
 \begin{document}
 
 %\makecapaproposta             % cria capa para proposta%
-%\makecapadissertacao           % cria capa para dissertacao de mestrado %
-%\makerosto                     % cria folha de rosto para versao final da UFPR %
+\makecapadissertacao           % cria capa para dissertacao de mestrado %
+\makerosto                     % cria folha de rosto para versao final da UFPR %
 %\maketermo                     % cria folha com o termo de aprovacao da dissertacao%
 
 %\singlespacing           % espacamento 1 - capa UFPR%
@@ -54,43 +57,43 @@
 \pagestyle{headings}
 \pagenumbering{roman}
 
-%\chapter*{Agradecimentos}
-%\input{agradecimentos.tex}          % possiu somente o texto
+\chapter*{Agradecimentos}
+\input{agradecimentos.tex}          % possiu somente o texto
 
-%\tableofcontents
+\tableofcontents
 
-%\listoffigures         % se houver mais do que 3 figuras
-%\addcontentsline{toc}{chapter}{\MakeUppercase{Lista de Figuras}}
-%\newpage
+\listoffigures         % se houver mais do que 3 figuras
+\addcontentsline{toc}{chapter}{\MakeUppercase{Lista de Figuras}}
+\newpage
 
-%\listoftables        % se houver mais do que 3 tabelas
-%\addcontentsline{toc}{chapter}{\MakeUppercase{Lista de Tabelas}}
-%\newpage
+\listoftables        % se houver mais do que 3 tabelas
+\addcontentsline{toc}{chapter}{\MakeUppercase{Lista de Tabelas}}
+\newpage
 
-%\chapter*{Resumo}
-%\addcontentsline{toc}{chapter}{\MakeUppercase{Resumo}}
-%\input{resumo.tex}           % somente o texto
-%\newpage
+\chapter*{Resumo}
+\addcontentsline{toc}{chapter}{\MakeUppercase{Resumo}}
+\input{resumo.tex}           % somente o texto
+\newpage
 
-%\chapter*{Abstract}
-%\addcontentsline{toc}{chapter}{\MakeUppercase{Abstract}}
-%\input{abstract.tex}        % somente o texto
-%\newpage
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{\MakeUppercase{Abstract}}
+\input{abstract.tex}        % somente o texto
+\newpage
 
 \pagenumbering{arabic}
 
-\chapter*{Relatório de Final de Semestre}
-\begin{center}
-Renan Greca
-\end{center}
+%\chapter*{Relatório de Final de Semestre}
+%\begin{center}
+%Renan Greca
+%\end{center}
 
-\addcontentsline{toc}{chapter}{\MakeUppercase{Relatório de Final de Semestre}}
-\input{relatorio.tex}
+%\addcontentsline{toc}{chapter}{\MakeUppercase{Relatório de Final de Semestre}}
+%\input{relatorio.tex}
 \newpage
 
-%\input{capitulo1.tex}
-%\input{capitulo2.tex}
-%\input{capitulo3.tex}
+\input{capitulo1.tex}
+\input{capitulo2.tex}
+\input{capitulo3.tex}
 %\input{capitulo4.tex}
 %\input{capitulo5.tex}
 %\input{capitulo6.tex}
@@ -98,8 +101,8 @@ Renan Greca
 
 
 
-%\bibliographystyle{brazil}
-%\bibliography{dissertacao}
+\bibliographystyle{brazil}
+\bibliography{dissertacao}
 % utilize macros (3 primeiras letras do mes em ingles, minusculas) no seu
 % .bib para atribuir o nome do mes em portugues nas referencia,
 % se o style for brazil, outros estilos tambem aceitam estas macros
@@ -111,9 +114,9 @@ Renan Greca
 %   month =        {}#sep;
 % }
 %
-%\addcontentsline{toc}{chapter}{\MakeUppercase{Bibliografia}}
+\addcontentsline{toc}{chapter}{\MakeUppercase{Bibliografia}}
 
 \singlespacing
-%\makecapadissertacao
+\makecapadissertacao
 
 \end{document}
