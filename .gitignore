@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 
+.idea
+
 # C extensions
 *.so
 
@@ -28,6 +30,7 @@ var/
 *.blg
 *.dvi
 *.synctex.gz
+*.fdb_latexmk
 *.toc
 *.sty
 
