@@ -9,7 +9,7 @@ import datetime
 
 directory = os.path.dirname(os.path.realpath(__file__))
 
-def compare_dirs(dir, level=0):
+def compare_all_dirs(dir, level=0):
     modified = {}
     added = {}
 
@@ -40,12 +40,78 @@ def compare_dirs(dir, level=0):
     if dir_a['datem'] == dir_c['datem']:
         print 'Diretório não mudou'
 
-    (a_to_b, b_to_a) = compare_a_and_b(dir_a['files'], dir_b['files'])
+    changes_a = compare_with_previous(dir_a['files'], dir_c['files'])
+    data = json.dumps(changes_a)
+    # Saves current status of files into files.json
+    f = open(join(directory, 'out_a.json'), 'w')
+    f.write(data)
+    f.close()
 
-    print a_to_b
-    print b_to_a
+    changes_b = compare_with_previous(dir_b['files'], dir_c['files'])
+    data = json.dumps(changes_b)
+    # Saves current status of files into files.json
+    f = open(join(directory, 'out_b.json'), 'w')
+    f.write(data)
+    f.close()
 
-    #return modified, added
+    resolve_conflicts(changes_a["created"], changes_b["created"])
+    resolve_conflicts(changes_a["altered"], changes_b["altered"])
+
+    return changes_a, changes_b
+
+def resolve_conflicts(a, b):
+    for name, file in a.iteritems():
+        if name in b:
+            if file['datem'] != b[name]['datem']:
+                print "Conflict!! File: ", name
+
+
+def compare_with_previous(files, oldfiles):
+    changes = {
+        "created": [],
+        "altered": [],
+        "deleted": []
+    }
+
+    print 'Checking for new or altered files'
+    changes["created"], changes["altered"] = compare_dirs(files, oldfiles)
+
+    print 'Checking for removed files'
+    changes["deleted"], ignore = compare_dirs(oldfiles, files)
+
+    return changes
+
+def compare_changes(a, b):
+    sync = {
+        "created": [],
+        "altered": [],
+        "deleted": []
+    }
+
+def compare_dirs(a, b):
+    created = {}
+    altered = {}
+
+    for name, file in a.iteritems():
+        if file['isDir']:
+            if name in b and b[name]['isDir']:
+                c, a = compare_dirs(file['files'], b[name]['files'])
+                if len(c) > 0:
+                    created[name] = c
+                if len(a) > 0:
+                    altered[name] = a
+            else:
+                created[name] = file
+        else:
+            if name in b:
+                if file['datem'] > b[name]['datem']:
+                    print 'File ', name, ' has been changed'
+                    altered[name] = file
+            else:
+                created[name] = file
+
+    return created, altered
+
 
 def compare_a_and_b(files, rfiles):
     # Compare Dir A with Dir B
@@ -54,17 +120,14 @@ def compare_a_and_b(files, rfiles):
 
     print 'Checking for new files in A'
     for name, file in files.iteritems():
-        if file['isDir']:
-
-        else:
-            if name in rfiles:
-                print 'In common: ', name
-                if file['datem'] > rfiles[name]['datem']:
-                    print 'File ', name, ' has been changed'
-                    a_to_b.append(name)
-            else:
-                print 'Different: ', name
+        if name in rfiles:
+            print 'In common: ', name
+            if file['datem'] > rfiles[name]['datem']:
+                print 'File ', name, ' has been changed'
                 a_to_b.append(name)
+        else:
+            print 'Different: ', name
+            a_to_b.append(name)
 
     print 'Checking for new files in B'
     for name, file in rfiles.iteritems():
@@ -141,4 +204,4 @@ def dates(f):
     return datem, datec
 
 if __name__ == '__main__':
-    compare_dirs(directory, level=0)
+    compare_all_dirs(directory, level=0)

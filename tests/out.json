@@ -1,0 +1,59 @@
+{
+  "deleted": [
+    "d.png"
+  ],
+  "altered": {
+    "c.png": {
+      "isDir": false,
+      "datec": "2015-09-17T09:25:25.954234",
+      "datem": "2015-02-28T14:05:25.928954",
+      "name": "c.png"
+    }
+  },
+  "created": {
+    "a.png": {
+      "isDir": false,
+      "datec": "2015-09-17T09:25:18.634234",
+      "datem": "2015-01-28T14:05:25.928954",
+      "name": "a.png"
+    },
+    "something": {
+      "isDir": true,
+      "files": {
+        "strange.png": {
+          "isDir": false,
+          "datec": "2015-09-17T09:25:31.650234",
+          "datem": "2015-01-28T14:05:25.928954",
+          "name": "other.png"
+        },
+        "random": {
+          "isDir": true,
+          "files": {
+            "weird.png": {
+              "isDir": false,
+              "datec": "2015-09-17T09:25:55.934233",
+              "datem": "2015-01-28T14:05:25.928954",
+              "name": "thingamajigs.png"
+            }
+          },
+          "datec": "2015-09-17T09:25:55.934233",
+          "datem": "2015-09-17T09:25:55.934233",
+          "name": "/home/renan/wisync/more/random"
+        }
+      },
+      "datec": "2015-09-17T09:25:45.762234",
+      "datem": "2015-09-17T09:25:45.762234",
+      "name": "/home/renan/wisync/more"
+    },
+    "more": {
+      "random": {
+        "thingamajigs.png": {
+          "isDir": false,
+          "datec": "2015-09-17T09:25:55.934233",
+          "datem": "2015-01-28T14:05:25.928954",
+          "name": "thingamajigs.png"
+        }
+      }
+    }
+  }
+}

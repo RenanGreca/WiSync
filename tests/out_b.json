@@ -1,6 +1,11 @@
 {
-  "isDir": true,
-  "files": {
+  "deleted": {
+    "b.png": {
+      "isDir": false,
+      "datec": "2015-09-17T09:25:22.158234",
+      "datem": "2015-01-28T14:05:25.928954",
+      "name": "b.png"
+    },
     "stuff": {
       "isDir": true,
       "files": {
@@ -15,48 +20,54 @@
       "datem": "2015-09-17T09:22:36.006237",
       "name": "/home/renan/wisync/stuff"
     },
-    "more": {
-      "isDir": true,
-      "files": {
-        "random": {
-          "isDir": true,
-          "files": {
-          },
-          "datec": "2015-09-17T09:25:55.934233",
-          "datem": "2015-09-17T09:25:55.934233",
-          "name": "/home/renan/wisync/more/random"
-        },
-        "other.png": {
-          "isDir": false,
-          "datec": "2015-09-17T09:25:31.650234",
-          "datem": "2015-01-28T14:05:25.928954",
-          "name": "other.png"
-        }
-      },
-      "datec": "2015-09-17T09:25:45.762234",
-      "datem": "2015-09-17T09:25:45.762234",
-      "name": "/home/renan/wisync/more"
-    },
-    "c.png": {
-      "isDir": false,
-      "datec": "2015-09-17T09:25:25.954234",
-      "datem": "2015-01-28T14:05:25.928954",
-      "name": "c.png"
-    },
-    "b.png": {
-      "isDir": false,
-      "datec": "2015-09-17T09:25:22.158234",
-      "datem": "2015-01-28T14:05:25.928954",
-      "name": "b.png"
-    },
     "d.png": {
       "isDir": false,
       "datec": "2015-09-17T09:25:22.158234",
       "datem": "2015-01-28T14:05:25.928954",
       "name": "b.png"
+    },
+    "more": {
+      "isDir": true,
+      "files": {
+        "other.png": {
+          "isDir": false,
+          "datec": "2015-09-17T09:25:31.650234",
+          "datem": "2015-01-28T14:05:25.928954",
+          "name": "other.png"
+        },
+        "random": {
+          "isDir": true,
+          "files": {},
+          "datec": "2015-09-17T09:25:55.934233",
+          "datem": "2015-09-17T09:25:55.934233",
+          "name": "/home/renan/wisync/more/random"
+        }
+      },
+      "datec": "2015-09-17T09:25:45.762234",
+      "datem": "2015-09-17T09:25:45.762234",
+      "name": "/home/renan/wisync/more"
     }
   },
-  "datec": "2015-09-17T09:25:36.450234",
-  "datem": "2015-09-17T09:25:36.450234",
-  "name": "/home/renan/wisync"
+  "altered": {
+    "c.png": {
+      "isDir": false,
+      "datec": "2015-09-17T09:25:25.954234",
+      "datem": "2015-03-28T14:05:25.928954",
+      "name": "c.png"
+    }
+  },
+  "created": {
+    "flickr.png": {
+      "isDir": false,
+      "datec": "2015-09-15T08:40:32",
+      "datem": "2015-02-27T21:24:01",
+      "name": "flickr.png"
+    },
+    "a.png": {
+      "isDir": false,
+      "datec": "2015-09-17T09:25:18.634234",
+      "datem": "2015-01-28T14:05:25.928954",
+      "name": "a.png"
+    }
+  }
 }
