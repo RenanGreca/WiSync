@@ -9,10 +9,10 @@ import datetime
 
 directory = os.path.dirname(os.path.realpath(__file__))
 
-def compare_all_dirs(dir):
+def compare_all_dirs(directory):
     # Dir A é o JSON contendo informações do diretório local
     try:
-        with open(join(dir, 'files.json'), 'r') as json_file:
+        with open(join(directory, 'files.json'), 'r') as json_file:
             dir_a = json.load(json_file)
     except Exception:
         print "[F] files.json não encontrado!"
@@ -20,14 +20,14 @@ def compare_all_dirs(dir):
 
     # Dir B é o JSON contendo informações do diretório remoto
     try:
-        dir_b = json.load(open(join(dir, 'rfiles.json'), 'r'))
+        dir_b = json.load(open(join(directory, 'rfiles.json'), 'r'))
     except Exception:
         print "[F] rfiles.json não encontrado!"
         return
 
     # Dir C é o JSON contendo informações do estado do diretório após a última sincronização
     try:
-        dir_c = json.load(open(join(dir, 'last_sync.json'), 'r'))
+        dir_c = json.load(open(join(directory, 'last_sync.json'), 'r'))
 
         if dir_a['datem'] == dir_c['datem']:
             print 'Diretório A não mudou'
@@ -82,8 +82,6 @@ def compare_all_dirs(dir):
         f.close()
 
         return changes_a, changes_b
-
-
 
 def resolve_conflicts(a, b):
     for name, file in a.iteritems():
@@ -231,4 +229,4 @@ def dates(f):
     return datem, datec
 
 if __name__ == '__main__':
-    compare_all_dirs(directory, level=0)
+    compare_all_dirs(directory)

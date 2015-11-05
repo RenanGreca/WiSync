@@ -24,6 +24,7 @@ class WiFiles():
             Caminho para o diretório a ser usado.
         """
         self.dir = direc
+        print direc
         if not exists(self.dir):
             exit("Diretório não existente.")
 
@@ -92,49 +93,61 @@ class WiFiles():
 
     # Compara o diretório atual com o armazenado no pkl
     # e toma as decisões adequadas.
-    def compare_dirs(self, dir_a=None, dir_b=None, dir_c=None, level=0):
-        modified = {}
-        added = {}
-
-        a_to_b = {}
-        b_to_a = {}
-
+    def compare_dirs(self):
         # Dir A é o JSON contendo informações do diretório local
-        if dir_a is None:
-            try:
-                dir_a = json.load(join(self.auxdir, 'files.json'))
-            except Exception:
-                print "[F] files.json não encontrado!"
+        try:
+            print join(self.auxdir, 'files.json')
+            with open(join(self.auxdir, 'files.json'), 'r') as json_file:
+                dir_a = json.load(json_file)
+        except Exception:
+            print "[F] files.json não encontrado!"
+            return
 
         # Dir B é o JSON contendo informações do diretório remoto
-        if dir_b is None:
-            try:
-                dir_b = json.load(join(self.auxdir, 'rfiles.json'))
-            except Exception:
-                print "[F] rfiles.json não encontrado!"
+        try:
+            with open(join(self.auxdir, 'rfiles.json'), 'r') as json_file:
+                dir_b = json.load(json_file)
+        except Exception:
+            print "[F] rfiles.json não encontrado!"
+            return
 
         # Dir C é o JSON contendo informações do estado do diretório após a última sincronização
-        if dir_c is None:
-            try:
-                dir_c = json.load(join(self.auxdir, 'last_sync2.json'))
-            except Exception:
-                print "[F] last_sync2.json não encontrado!"
+        try:
+            with open(join(self.auxdir, 'last_sync.json'), 'r') as json_file:
+                dir_c = json.load(json_file)
 
+            if dir_a['datem'] == dir_c['datem']:
+                print 'Diretório A não mudou'
 
+            if dir_b['datem'] == dir_c['datem']:
+                print 'Diretório B não mudou'
 
-        """
-        for , arquivo in dir_atual.iteritems():
-            if isfile(join(direc, nome)):
-                if nome in dir_anterior:
-                    if dir_atual[nome]['datam'] != dir_anterior[nome]['datam']:
-                        modificados[nome] = dir_atual[nome]
-                else:
-                    adicionados[nome] = dir_atual[nome]
-            else:
-                modificados[nome], adicionados[nome] = compare_dirs(join(direc, nome), arquivo['conteudo'], dir_anterior)
+            changes_a = compare_with_previous(dir_a['files'], dir_c['files'])
 
-        return modificados, adicionados
-        """
+            changes_b = compare_with_previous(dir_b['files'], dir_c['files'])
+        except Exception:
+            print "[F] last_sync.json não encontrado!"
+            print "[F] Realizando sincronização inicial."
+
+            if dir_a['datem'] == dir_b['datem']:
+                print 'Diretórios não mudaram'
+
+            changes_a = compare_with_previous(dir_a['files'], dir_b['files'], check_removed=False)
+
+            changes_b = compare_with_previous(dir_b['files'], dir_a['files'], check_removed=False)
+
+        resolve_conflicts(changes_a["created"], changes_b["created"])
+        resolve_conflicts(changes_a["altered"], changes_b["altered"])
+
+        changes = {'server': changes_a, 'client': changes_b}
+
+        data = json.dumps(changes)
+        # Saves current status of files into files.json
+        with open(join(self.auxdir, 'changes.json'), 'w') as f:
+            f.write(data)
+
+        return changes
+        #return changes_a, changes_b
 
     def save(self):
         """
@@ -143,9 +156,59 @@ class WiFiles():
         """
         files = self.read_dir()
         data = json.dumps(files.dict())
-        f = open(join(self.auxdir, 'last_sync2.json'), 'w')
+        f = open(join(self.auxdir, 'last_sync.json'), 'w')
         f.write(data)
         f.close()
+
+
+def resolve_conflicts(a, b):
+    for name, file in a.iteritems():
+        if name in b:
+            if file['datem'] != b[name]['datem']:
+                file['name'] = '(A) '+file['name']
+                b[name]['name'] = '(B) '+file['name']
+
+
+def compare_with_previous(files, oldfiles, check_removed=True):
+    changes = {
+        "created": {},
+        "altered": {},
+        "deleted": {}
+    }
+
+    print 'Checking for new or altered files'
+    changes["created"], changes["altered"] = compare(files, oldfiles)
+
+    if check_removed:
+        print 'Checking for removed files'
+        changes["deleted"], ignore = compare(oldfiles, files)
+
+    return changes
+
+
+def compare(a, b):
+    created = {}
+    altered = {}
+
+    for name, file in a.iteritems():
+        if file['isDir']:
+            if name in b and b[name]['isDir']:
+                c, a = compare(file['files'], b[name]['files'])
+                if len(c) > 0:
+                    created[name] = c
+                if len(a) > 0:
+                    altered[name] = a
+            else:
+                created[name] = file
+        else:
+            if name in b:
+                if file['datem'] > b[name]['datem']:
+                    print 'File ', name, ' has been changed'
+                    altered[name] = file
+            else:
+                created[name] = file
+
+    return created, altered
 
 
 class File():
@@ -156,20 +219,20 @@ class File():
         self.datec = datec
         self.isDir = isDir
         if self.isDir:
-            self.files = []
+            self.files = {}
 
     def add_file(self, f):
         if not self.isDir:
             print "Objeto não é um diretório"
             return
-        self.files.append(f)
+        self.files[f.name] = f
 
     def dict(self):
         d = self.__dict__
         if self.isDir:
-            files = []
-            for f in self.files:
-                files.append(f.dict())
+            files = {}
+            for name, f in self.files.iteritems():
+                files[name] = f.dict()
             d['files'] = files
         return d
 
@@ -208,82 +271,3 @@ def read_dir(direc, nivel=0):
                            'conteudo': read_dir(join(direc,f), nivel+1)}
 
     return arquivos
-
-
-# Compara o diretório atual com o armazenado no pkl
-# e toma as decisões adequadas.
-def compare_dirs(direc, dir_atual, dir_anterior):
-    modificados = {}
-    adicionados = {}
-
-    for nome, arquivo in dir_atual.iteritems():
-        if isfile(join(direc, nome)):
-            if nome in dir_anterior:
-                if dir_atual[nome]['datam'] != dir_anterior[nome]['datam']:
-                    modificados[nome] = dir_atual[nome]
-            else:
-                adicionados[nome] = dir_atual[nome]
-        else:
-            modificados[nome], adicionados[nome] = compare_dirs(join(direc, nome), arquivo['conteudo'], dir_anterior)
-
-    return modificados, adicionados
-
-
-def main(args):
-
-    dir_atual = read_dir(args.directory)
-
-    #if exists(join(args.directory, '.sync.pkl')):
-    #    dir_anterior = pickle.load(open(join(args.directory, '.sync.pkl')))
-
-    #pickle.dump(dir_atual, open(join(args.directory, '.sync.pkl'), 'w'))
-
-    mudancas = compare_dirs(args.directory, dir_atual, dir_anterior)
-
-    print 'Dir atual: ',dir_atual
-    print 'Dir anterior',dir_anterior
-    print 'Mudanças: ',mudancas
-
-    return;
-    # Gets the remote IP address
-    hostname = args.hostname
-    if hostname.endswith('.local'):
-        CLIENT_IP = socket.gethostbyname(hostname)
-    else:
-        CLIENT_IP = socket.gethostbyname(hostname+'.local')
-
-    # Gets the current computer's IP address
-    hostname = socket.gethostname()
-    if hostname.endswith('.local'):
-        SERVER_IP = socket.gethostbyname(hostname)
-    else:
-        SERVER_IP = socket.gethostbyname(hostname+'.local')
-
-    print SERVER_IP, CLIENT_IP
-
-    TCP_PORT = 5005
-    BUFFER_SIZE = 1024
-
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((SERVER_IP, TCP_PORT))
-    s.listen(1)
-    print 'Server is running with IP', SERVER_IP
-
-    c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print 'Trying to connect with client', CLIENT_IP
-    c.connect((CLIENT_IP, TCP_PORT))
-
-    conn, addr = s.accept()
-    print 'Connection address:', addr
-    while 1:
-        message = raw_input('Here: ')
-        c.send(message)
-        data = conn.recv(BUFFER_SIZE)
-        if not data:
-            break
-        print "There: ", datas
-        conn.send(data)  # echo
-    conn.close()
-
-    data = c.recv(BUFFER_SIZE)
-    c.close()

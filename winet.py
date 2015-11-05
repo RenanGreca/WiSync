@@ -13,10 +13,12 @@ import sys
 import urllib2
 import errno
 import traceback
+import json
 
 from wifiles import WiFiles
 
-from os.path import join
+from os import listdir, makedirs
+from os.path import isfile, isdir, join, getmtime, getctime, exists
 
 from time import sleep
 
@@ -38,17 +40,24 @@ class WiNet():
             self.ip = socket.gethostbyname(self.host+'.local')
 
         self.remote_addr = None
+        print hostname
         if hostname is not None:
             if hostname.endswith('.local'):
                 self.remote_addr = socket.gethostbyname(hostname)
-
             else:
-                self.remote_addr = socket.gethostbyname(hostname+'.local')
+                try:
+                    self.remote_addr = socket.gethostbyname(hostname+'.local')
+                except Exception:
+                    print hostname
+                    remote_hostname = socket.gethostbyaddr(hostname)
+                    self.remote_addr = hostname
+                    print self.remote_addr
 
         self.isServer = isServer
         self.username = "WiSync"
         self.password = "WiSync"
         self.direc = direc
+        self.changes = {}
 
     def server(self):
         filename = join(self.direc.auxdir, 'files.json')
@@ -57,7 +66,23 @@ class WiNet():
         print "[S] Terminou de hospedar arquivo"
 
         sleep(1)
-        self.client()
+        filename = 'files.json'
+        data = self.remote_file(filename)
+        if data is not None:
+            with open(join(self.direc.auxdir, 'rfiles.json'), "w") as f:
+                f.write(data)
+            changes = self.compare_dirs()
+
+            sleep(1)
+            self.send_files(changes['server']['created'])
+
+            sleep(1)
+            self.receive_files(changes['client']['created'])
+
+            sleep(1)
+            self.clean_up(changes['server']['deleted'])
+
+        #self.client()
 
     def client(self):
         """ Parte de cliente do programa.
@@ -77,21 +102,36 @@ class WiNet():
         #if not self.isServer:
         #    self.isServer = True
         #    self.serve(direc)
-        print data
         if data is not None:
-            f = open(join(self.direc.auxdir, 'rfiles.json'), "w")
-            f.write(data)
-            f.close()
-            if not self.isServer:
-                self.serve(self.direc)
-            else:
-                self.compare_dirs()
-            # TODO Fazer resto da parte cliente
+            with open(join(self.direc.auxdir, 'rfiles.json'), "w") as f:
+                f.write(data)
+            filename = join(self.direc.auxdir, 'files.json')
+            self.serve(filename)
+
+            sleep(1)
+            self.changes = self.remote_file('changes.json')
+            with open(join(self.direc.auxdir, 'changes.json'), "w") as f:
+                f.write(self.changes)
+
+            with open(join(self.direc.auxdir, 'changes.json'), "r") as f:
+                changes = json.load(f)
+                print changes
+
+            sleep(1)
+            self.receive_files(changes['server']['created'])
+
+            sleep(1)
+            self.send_files(changes['client']['created'])
+
+            sleep(1)
+            self.clean_up(changes['client']['deleted'])
 
     def remote_file(self, filename):
+
         if self.remote_addr is not None:
             try:
-                response = urllib2.urlopen('http://'+self.remote_addr+':8080/'+filename, timeout=1)
+                print 'http://'+self.remote_addr+':8080/'+filename
+                response = urllib2.urlopen('http://'+self.remote_addr+':8080/'+filename, timeout=100)
                 return chunk_read(response, filename, report_hook=chunk_report)
             except urllib2.HTTPError, e:
                 print '[C] HTTPError = ' + str(e.code)
@@ -140,17 +180,58 @@ class WiNet():
             #print "[C] Servidor não encontrado115"
             #return None
 
-    def serve(self, direc):
-        filename = join(direc.auxdir, 'files.json')
+    def serve(self, filename):
         print "Hospedando arquivo", filename, "\n"
-        serve_files(filename, maxdown=1, ip_addr='', port=8080)
-        #if self.isServer:
-        #    sleep(1)
-        #    self.client(direc)
+        remote_addr = serve_files(filename, maxdown=1, ip_addr='', port=8080)
+        print remote_addr, filename
 
     def compare_dirs(self):
-        direc = WiFiles(self.direc)
-        direc.compare_dirs()
+        #direc = WiFiles(self.direc)
+        changes = self.direc.compare_dirs()
+        filename = join(self.direc.auxdir, 'changes.json')
+        self.serve(filename)
+
+        return changes
+
+    def send_files(self, files, directory=None):
+        print 'SEND FILES'
+        if directory is None:
+            directory = self.direc.dir
+
+        for name, f in files.iteritems():
+            if f['isDir']:
+                self.send_files(f['files'], directory=f['name'])
+            else:
+                filename = join(directory, name)
+                print filename
+                self.serve(filename)
+
+        return
+
+    def receive_files(self, files, directory=None):
+        print 'RECEIVE FILES'
+        if directory is None:
+            directory = self.direc.dir
+
+        for name, f in files.iteritems():
+            if f['isDir']:
+                dirs = name.split('/')
+                dirname = join(directory, dirs.pop())
+                if not exists(dirname):
+                    makedirs(dirname)
+                self.receive_files(f['files'], dirname)
+            else:
+                print name
+                data = self.remote_file(urllib2.quote(name))
+                with open(join(directory, name), "w") as d:
+                    d.write(data)
+
+
+        return
+
+
+    def clean_up(self, files):
+        return
 
 # funções auxiliares
 def chunk_report(bytes_so_far, chunk_size, total_size, filename):

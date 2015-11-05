@@ -41,18 +41,6 @@ def main(args):
         net = WiNet(direc, args.hostname, False)
         net.client()
 
-    #server = threading.Thread(target=hello)
-    #client = threading.Thread(target=net.client(direc))
-
-    # server = threading.Thread(target=net.server)
-    # client = threading.Thread(target=net.client)
-    #
-    # server.start()
-    # client.start()
-    #
-    # server.join()
-    # client.join()
-
     # Salva os dados no diretório para a próxima sincronização
     direc.save()
 
