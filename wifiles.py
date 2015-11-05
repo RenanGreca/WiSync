@@ -116,9 +116,9 @@ class WiFiles():
         # Dir C é o JSON contendo informações do estado do diretório após a última sincronização
         if dir_c is None:
             try:
-                dir_c = json.load(join(self.auxdir, 'last_sync.json'))
+                dir_c = json.load(join(self.auxdir, 'last_sync2.json'))
             except Exception:
-                print "[F] last_sync.json não encontrado!"
+                print "[F] last_sync2.json não encontrado!"
 
 
 
@@ -143,7 +143,7 @@ class WiFiles():
         """
         files = self.read_dir()
         data = json.dumps(files.dict())
-        f = open(join(self.auxdir, 'last_sync.json'), 'w')
+        f = open(join(self.auxdir, 'last_sync2.json'), 'w')
         f.write(data)
         f.close()
 

@@ -9,12 +9,7 @@ import datetime
 
 directory = os.path.dirname(os.path.realpath(__file__))
 
-def compare_all_dirs(dir, level=0):
-    modified = {}
-    added = {}
-
-    countries = json.load(open(os.path.join(dir, 'files.json'), 'r'))
-
+def compare_all_dirs(dir):
     # Dir A é o JSON contendo informações do diretório local
     try:
         with open(join(dir, 'files.json'), 'r') as json_file:
@@ -33,37 +28,69 @@ def compare_all_dirs(dir, level=0):
     # Dir C é o JSON contendo informações do estado do diretório após a última sincronização
     try:
         dir_c = json.load(open(join(dir, 'last_sync.json'), 'r'))
+
+        if dir_a['datem'] == dir_c['datem']:
+            print 'Diretório A não mudou'
+
+        if dir_b['datem'] == dir_c['datem']:
+            print 'Diretório B não mudou'
+
+        changes_a = compare_with_previous(dir_a['files'], dir_c['files'])
+
+        changes_b = compare_with_previous(dir_b['files'], dir_c['files'])
+
+        resolve_conflicts(changes_a["created"], changes_b["created"])
+        resolve_conflicts(changes_a["altered"], changes_b["altered"])
+
+        data = json.dumps(changes_a)
+        # Saves current status of files into files.json
+        f = open(join(directory, 'out_a.json'), 'w')
+        f.write(data)
+        f.close()
+
+        data = json.dumps(changes_b)
+        # Saves current status of files into files.json
+        f = open(join(directory, 'out_b.json'), 'w')
+        f.write(data)
+        f.close()
+
+        return changes_a, changes_b
+
     except Exception:
         print "[F] last_sync.json não encontrado!"
-        return
 
-    if dir_a['datem'] == dir_c['datem']:
-        print 'Diretório não mudou'
+        if dir_a['datem'] == dir_b['datem']:
+            print 'Diretórios não mudaram'
 
-    changes_a = compare_with_previous(dir_a['files'], dir_c['files'])
-    data = json.dumps(changes_a)
-    # Saves current status of files into files.json
-    f = open(join(directory, 'out_a.json'), 'w')
-    f.write(data)
-    f.close()
+        changes_a = compare_with_previous(dir_a['files'], dir_b['files'])
 
-    changes_b = compare_with_previous(dir_b['files'], dir_c['files'])
-    data = json.dumps(changes_b)
-    # Saves current status of files into files.json
-    f = open(join(directory, 'out_b.json'), 'w')
-    f.write(data)
-    f.close()
+        changes_b = compare_with_previous(dir_b['files'], dir_a['files'])
 
-    resolve_conflicts(changes_a["created"], changes_b["created"])
-    resolve_conflicts(changes_a["altered"], changes_b["altered"])
+        resolve_conflicts(changes_a["created"], changes_b["created"])
+        resolve_conflicts(changes_a["altered"], changes_b["altered"])
 
-    return changes_a, changes_b
+        data = json.dumps(changes_a)
+        # Saves current status of files into files.json
+        f = open(join(directory, 'out_a.json'), 'w')
+        f.write(data)
+        f.close()
+
+        data = json.dumps(changes_b)
+        # Saves current status of files into files.json
+        f = open(join(directory, 'out_b.json'), 'w')
+        f.write(data)
+        f.close()
+
+        return changes_a, changes_b
+
+
 
 def resolve_conflicts(a, b):
     for name, file in a.iteritems():
         if name in b:
             if file['datem'] != b[name]['datem']:
-                print "Conflict!! File: ", name
+                file['name'] = '(A) '+file['name']
+                b[name]['name'] = '(B) '+file['name']
 
 
 def compare_with_previous(files, oldfiles):
