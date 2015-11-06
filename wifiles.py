@@ -69,10 +69,14 @@ class WiFiles():
 
         if direc is None:
             direc = self.dir
+
+        dirs = direc.split('/')
+        print dirs
+        dirname = dirs.pop()
         # files = {}
 
         datem, datec = dates(direc)
-        files = File(direc, datem, datec, isDir=True)
+        files = File(dirname, datem, datec, isDir=True)
 
         for f in listdir(direc):
             datem, datec = dates(join(direc, f))
@@ -162,11 +166,11 @@ class WiFiles():
 
 
 def resolve_conflicts(a, b):
-    for name, file in a.iteritems():
+    for name, f in a.iteritems():
         if name in b:
-            if file['datem'] != b[name]['datem']:
-                file['name'] = '(A) '+file['name']
-                b[name]['name'] = '(B) '+file['name']
+            if f['datem'] != b[name]['datem'] and not f['isDir']:
+                f['name'] = '(A) '+f['name']
+                b[name]['name'] = '(B) '+f['name']
 
 
 def compare_with_previous(files, oldfiles, check_removed=True):
@@ -195,9 +199,11 @@ def compare(a, b):
             if name in b and b[name]['isDir']:
                 c, a = compare(file['files'], b[name]['files'])
                 if len(c) > 0:
-                    created[name] = c
+                    created[name] = file
+                    created[name]['files'] = c
                 if len(a) > 0:
-                    altered[name] = a
+                    altered[name] = file
+                    altered[name]['files'] = a
             else:
                 created[name] = file
         else:

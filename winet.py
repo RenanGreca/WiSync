@@ -73,7 +73,6 @@ class WiNet():
                 f.write(data)
             changes = self.compare_dirs()
 
-            sleep(1)
             self.send_files(changes['server']['created'])
 
             sleep(1)
@@ -115,15 +114,12 @@ class WiNet():
 
             with open(join(self.direc.auxdir, 'changes.json'), "r") as f:
                 changes = json.load(f)
-                print changes
 
             sleep(1)
             self.receive_files(changes['server']['created'])
 
-            sleep(1)
             self.send_files(changes['client']['created'])
 
-            sleep(1)
             self.clean_up(changes['client']['deleted'])
 
     def remote_file(self, filename):
@@ -135,15 +131,14 @@ class WiNet():
                 return chunk_read(response, filename, report_hook=chunk_report)
             except urllib2.HTTPError, e:
                 print '[C] HTTPError = ' + str(e.code)
+                exit()
             except urllib2.URLError, e:
                 #print 'URLError = ' + str(e.reason)
                 print "\n[C] Servidor não encontrado"
-                pass
+                exit()
             except Exception as e:
-                if e.errno == 104:
-                    pass
-                else:
-                    print '[C] Erro: ' + traceback.format_exc()
+                print '[C] Erro: ' + traceback.format_exc()
+                exit()
 
         else:
             ips = self.ip.split('.')
@@ -198,22 +193,32 @@ class WiNet():
         if directory is None:
             directory = self.direc.dir
 
-        for name, f in files.iteritems():
+        import operator
+        filelist = sorted(files.items(), key=operator.itemgetter(0))
+        for name, f in filelist:
+            print name
+            if name == '.DS_Store' or name == 'desktop.ini':
+                continue
             if f['isDir']:
-                self.send_files(f['files'], directory=f['name'])
+                self.send_files(f['files'], directory=join(directory, f['name']))
             else:
                 filename = join(directory, name)
                 print filename
                 self.serve(filename)
-
-        return
 
     def receive_files(self, files, directory=None):
         print 'RECEIVE FILES'
         if directory is None:
             directory = self.direc.dir
 
-        for name, f in files.iteritems():
+        import operator
+        filelist = sorted(files.items(), key=operator.itemgetter(0))
+        for name, f in filelist:
+            print name
+
+            if name == '.DS_Store' or name == 'desktop.ini':
+                continue
+
             if f['isDir']:
                 dirs = name.split('/')
                 dirname = join(directory, dirs.pop())
@@ -222,13 +227,10 @@ class WiNet():
                 self.receive_files(f['files'], dirname)
             else:
                 print name
+                sleep(1)
                 data = self.remote_file(urllib2.quote(name))
                 with open(join(directory, name), "w") as d:
                     d.write(data)
-
-
-        return
-
 
     def clean_up(self, files):
         return
