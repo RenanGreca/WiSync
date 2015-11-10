@@ -17,8 +17,8 @@ import json
 
 from wifiles import WiFiles
 
-from os import listdir, makedirs
-from os.path import isfile, isdir, join, getmtime, getctime, exists
+from os import makedirs, remove
+from os.path import join, exists
 
 from time import sleep
 
@@ -42,16 +42,13 @@ class WiNet():
         self.remote_addr = None
         print hostname
         if hostname is not None:
-            if hostname.endswith('.local'):
-                self.remote_addr = socket.gethostbyname(hostname)
-            else:
                 try:
-                    self.remote_addr = socket.gethostbyname(hostname+'.local')
+                    if hostname.endswith('.local'):
+                        self.remote_addr = socket.gethostbyname(hostname)
+                    else:
+                        self.remote_addr = socket.gethostbyname(hostname+'.local')
                 except Exception:
-                    print hostname
-                    remote_hostname = socket.gethostbyaddr(hostname)
                     self.remote_addr = hostname
-                    print self.remote_addr
 
         self.isServer = isServer
         self.username = "WiSync"
@@ -73,13 +70,15 @@ class WiNet():
                 f.write(data)
             changes = self.compare_dirs()
 
+            print 'Preparando para enviar arquivos...'
             self.send_files(changes['server']['created'])
 
-            sleep(1)
+            print 'Envio de arquivos concluído. Preparando para receber...'
+            sleep(4)
             self.receive_files(changes['client']['created'])
 
-            sleep(1)
-            self.clean_up(changes['server']['deleted'])
+            print 'Troca de arquivos concluída. Realizando passos finais...'
+            self.clean_up(changes['client']['deleted'])
 
         #self.client()
 
@@ -115,12 +114,15 @@ class WiNet():
             with open(join(self.direc.auxdir, 'changes.json'), "r") as f:
                 changes = json.load(f)
 
+            print 'Preparando para receber arquivos...'
             sleep(1)
             self.receive_files(changes['server']['created'])
 
+            print 'Recebimento de arquivos concluído. Preparando para enviar...'
             self.send_files(changes['client']['created'])
 
-            self.clean_up(changes['client']['deleted'])
+            print 'Troca de arquivos concluída. Realizando passos finais...'
+            self.clean_up(changes['server']['deleted'])
 
     def remote_file(self, filename):
 
@@ -189,33 +191,30 @@ class WiNet():
         return changes
 
     def send_files(self, files, directory=None):
-        print 'SEND FILES'
         if directory is None:
             directory = self.direc.dir
 
         import operator
         filelist = sorted(files.items(), key=operator.itemgetter(0))
         for name, f in filelist:
-            print name
+            # Ignora arquivos de sistema (do OS X e do Windows)
             if name == '.DS_Store' or name == 'desktop.ini':
                 continue
+
             if f['isDir']:
                 self.send_files(f['files'], directory=join(directory, f['name']))
             else:
                 filename = join(directory, name)
-                print filename
                 self.serve(filename)
 
     def receive_files(self, files, directory=None):
-        print 'RECEIVE FILES'
         if directory is None:
             directory = self.direc.dir
 
         import operator
         filelist = sorted(files.items(), key=operator.itemgetter(0))
         for name, f in filelist:
-            print name
-
+            # Ignora arquivos de sistema (do OS X e do Windows)
             if name == '.DS_Store' or name == 'desktop.ini':
                 continue
 
@@ -226,14 +225,27 @@ class WiNet():
                     makedirs(dirname)
                 self.receive_files(f['files'], dirname)
             else:
-                print name
                 sleep(1)
                 data = self.remote_file(urllib2.quote(name))
                 with open(join(directory, name), "w") as d:
                     d.write(data)
 
-    def clean_up(self, files):
-        return
+    def clean_up(self, files, directory=None):
+        if directory is None:
+            directory = self.direc.dir
+
+        import operator
+        filelist = sorted(files.items(), key=operator.itemgetter(0))
+        for name, f in filelist:
+            # Ignora arquivos de sistema (do OS X e do Windows)
+            if name == '.DS_Store' or name == 'desktop.ini':
+                continue
+
+            if f['isDir']:
+                self.clean_up(f['files'], directory=join(directory, f['name']))
+            else:
+                filename = join(directory, name)
+                remove(filename)
 
 # funções auxiliares
 def chunk_report(bytes_so_far, chunk_size, total_size, filename):

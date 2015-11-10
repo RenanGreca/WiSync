@@ -24,7 +24,6 @@ class WiFiles():
             Caminho para o diretório a ser usado.
         """
         self.dir = direc
-        print direc
         if not exists(self.dir):
             exit("Diretório não existente.")
 
@@ -71,7 +70,6 @@ class WiFiles():
             direc = self.dir
 
         dirs = direc.split('/')
-        print dirs
         dirname = dirs.pop()
         # files = {}
 
@@ -180,11 +178,11 @@ def compare_with_previous(files, oldfiles, check_removed=True):
         "deleted": {}
     }
 
-    print 'Checking for new or altered files'
+    print 'Procurando arquivos novos ou modificados'
     changes["created"], changes["altered"] = compare(files, oldfiles)
 
     if check_removed:
-        print 'Checking for removed files'
+        print 'Procurando arquivos removidos'
         changes["deleted"], ignore = compare(oldfiles, files)
 
     return changes
@@ -195,6 +193,9 @@ def compare(a, b):
     altered = {}
 
     for name, file in a.iteritems():
+        if name == '.DS_Store' or name == 'desktop.ini':
+            continue
+
         if file['isDir']:
             if name in b and b[name]['isDir']:
                 c, a = compare(file['files'], b[name]['files'])
@@ -209,7 +210,7 @@ def compare(a, b):
         else:
             if name in b:
                 if file['datem'] > b[name]['datem']:
-                    print 'File ', name, ' has been changed'
+                    #print 'Arquivo ', name, ' foi modificado'
                     altered[name] = file
             else:
                 created[name] = file
