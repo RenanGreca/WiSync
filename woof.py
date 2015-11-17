@@ -366,13 +366,12 @@ def serve_files(filename, maxdown=1, ip_addr='', port=8080):
         else:
             location = "http://%s:%s/" % (ip_addr, httpd.server_port)
 
-        print "Now serving on %s" % location
+        print "Hospedando arquivo em %s" % location
 
     #while cpid != 0 and maxdownloads > 0:
     httpd.handle_request()
 
     global cli_addr
-    print 'Woof: ' + cli_addr
     return cli_addr
 
 

@@ -17,12 +17,16 @@ import json
 
 from wifiles import WiFiles
 
-from os import makedirs, remove
+from os import makedirs, remove, utime
 from os.path import join, exists
 
 from time import sleep
 
 from woof import serve_files
+
+import datetime, time
+from dateutil import parser
+
 
 class WiNet():
     def __init__(self, direc, hostname, isServer):
@@ -33,20 +37,17 @@ class WiNet():
             Nome de rede de um computador rodando outra instância do WiSync.
             (padrão: None)
         """
-        self.host = socket.gethostname()
-        if self.host.endswith('.local'):
-            self.ip = socket.gethostbyname(self.host)
-        else:
-            self.ip = socket.gethostbyname(self.host+'.local')
+
+        # Se o endereço hostname for diferente de .local, pega só a primeira parte
+        self.host = socket.gethostname().split('.')[0]
+        self.ip = socket.gethostbyname(self.host+'.local')
 
         self.remote_addr = None
         print hostname
         if hostname is not None:
                 try:
-                    if hostname.endswith('.local'):
-                        self.remote_addr = socket.gethostbyname(hostname)
-                    else:
-                        self.remote_addr = socket.gethostbyname(hostname+'.local')
+                    host = hostname.split('.')[0]
+                    self.remote_addr = socket.gethostbyname(host+'.local')
                 except Exception:
                     self.remote_addr = hostname
 
@@ -229,6 +230,11 @@ class WiNet():
                 data = self.remote_file(urllib2.quote(name))
                 with open(join(directory, name), "w") as d:
                     d.write(data)
+
+                atime = time.mktime(parser.parse(f['datec']).timetuple())
+                mtime = time.mktime(parser.parse(f['datem']).timetuple())
+                print atime, mtime
+                utime(join(directory, name), (atime, mtime))
 
     def clean_up(self, files, directory=None):
         if directory is None:
