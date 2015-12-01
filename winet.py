@@ -73,10 +73,13 @@ class WiNet():
 
             print 'Preparando para enviar arquivos...'
             self.send_files(changes['server']['created'])
+            self.send_files(changes['server']['altered'])
 
             print 'Envio de arquivos concluído. Preparando para receber...'
-            sleep(4)
+            sleep(3)
             self.receive_files(changes['client']['created'])
+            sleep(1)
+            self.receive_files(changes['client']['altered'])
 
             print 'Troca de arquivos concluída. Realizando passos finais...'
             self.clean_up(changes['client']['deleted'])
@@ -118,9 +121,11 @@ class WiNet():
             print 'Preparando para receber arquivos...'
             sleep(1)
             self.receive_files(changes['server']['created'])
+            self.receive_files(changes['server']['altered'])
 
             print 'Recebimento de arquivos concluído. Preparando para enviar...'
             self.send_files(changes['client']['created'])
+            self.send_files(changes['client']['altered'])
 
             print 'Troca de arquivos concluída. Realizando passos finais...'
             self.clean_up(changes['server']['deleted'])

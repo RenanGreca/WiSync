@@ -1,0 +1,25 @@
+\chapter{Resultados}
+\label{resultados}
+
+\section{Organização do Programa}
+O WiSync é composto por três arquivos: \texttt{wisync.py}, \texttt{winet.py} e \texttt{wifiles.py}. Abaixo estão as funcionalidades de cada um:
+\begin{itemize}
+  \item \texttt{wisync.py}: Arquivo principal do projeto, responsável por ler os parâmetros da linha de comando e controlar a execução do processo.
+  \item \texttt{winet.py}: Contém a classe WiNet, que inclui os métodos e atributos necessários para fazer as partes em rede do programa, como hospedar e receber arquivos.
+  \item \texttt{wifiles.py}: Contém a classe WiFiles, que inclui os métodos e atributos necessários fazer as partes que lidam com o sistema de arquivos do programa, como ler e comparar diretórios.
+\end{itemize}
+
+\subsection{Parâmetros de Execução}
+
+Para rodar o WiSync, utiliza-se o seguinte comando:
+\begin{verbatim}
+python wisync.py [-h] -d DIRECTORY [-n HOSTNAME] [-s]
+\end{verbatim}
+
+Os argumentos são os seguintes:
+\begin{itemize}
+  \item \texttt{-h, --help} Mostra o texto de ajuda do programa.
+  \item \texttt{-d DIRECTORY, --directory DIRECTORY} Caminho para o diretório a ser sincronizado (de preferência, o caminho completo)
+  \item \texttt{-n HOSTNAME, --hostname HOSTNAME} Nome de rede ou endereço IP do outro computador. Esse argumento é opcional e pode ser preenchido tanto pelo endereço IP do outro computador quanto pelo nome de rede. Por exemplo, \texttt{-n SgtPepper.local} e \texttt{-n 192.168.1.110} têm o mesmo efeito. Caso o argumento não esteja presente, o programa procura outras instâncias do WiSync na rede local.
+  \item \texttt{-s, --server} Modo servidor. Se definido, esta instância será o ``servidor'', hospedando seus arquivos antes da instância remota.
+\end{itemize}

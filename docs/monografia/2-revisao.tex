@@ -1,0 +1,24 @@
+\chapter{Revisão Bibliográfica}
+\label{revisao}
+
+\section{Python}
+
+\section{Sobre a Transmissão dos Arquivos}
+A primeira etapa do desenvolvimento do programa foi definir o método e protocolo que seriam usados na hora de transmitir arquivos entre os computadores.
+Após alguma pesquisa, quatro alternativas foram consideradas: 
+\begin{itemize}
+  \item \textbf{Sockets via TCP}\cite{cerf2005protocol}, que utilizaria a biblioteca padrão \texttt{socket} do Python\cite{pythonsockets} para transmitir os dados dos arquivos a nível de camada de transporte. A implementação em Python é relativamente simples, mas requer muita atenção porque arquivos maiores têm que ser divididos em blocos para depois serem re-montados.
+  \item \textbf{Secure Copy} (SCP), método que utiliza os mesmos padrões de segurança do protocolo SSH (\textit{secure shell}) para garantir a segurança e confidencialidade dos dados. A maneira mais simples de fazer isso em Python seria invocando um comando da linha de comando, que não dá muito controle sobre a operação de dentro do programa.
+  \item \textbf{File Transfer Protocol}\cite{rfc959} (FTP) é um protocolo da camada de aplicação específico para o envio de arquivos. Contudo, ele se mostra mais eficaz em situações onde há servidor e clientes bem definidos: ou seja, um servidor que hospeda arquivos e clientes que podem acessar e alterar os arquivos do servidor.
+  \item \textbf{Hypertext Transfer Protocol}\cite{rfc2068} (HTTP) é o protocolo padrão de envio de dados na Internet. É fácil de utilizar, mas os arquivos ficam temporariamente abertos a qualquer membro da rede.
+\end{itemize}
+
+[TO-DO: Remover referências ao WiSync]
+Para o WiSync, o HTTP foi escolhido para realizar a troca de arquivos.
+Isso se deve principalmente à facilidade de implementar essa troca, e também ao fato que dois computadores podem rapidamente trocar seus papéis de cliente e servidor enquanto transmitem arquivos entre si.
+Como o objetivo do WiSync é ser usado em redes locais privadas, a abertura temporária dos arquivos na rede não é uma grande preocupação.
+
+\section {JSON}
+O \textit{JavaScript Object Notation}, ou JSON\cite{json}, é um formato de armazenamento e troca de dados baseado na notação de objetos do JavaScript. Com o JSON, é possível armazenar objetos de um programa em um arquivo de texto, utilizando os tipos dictionary, array, string, number e boolean do JavaScript.
+O JSON foi escolhido por sua simples integração com Python e por ser um formato facilmente legível por um humano, facilitando a verificação dos dados durante os testes.
+Contudo, essa facilidade de leitura também se mostra uma desvantagem, já que é possível alterar os dados armazenados por fora do WiSync e então gerar resultados inesperados.
