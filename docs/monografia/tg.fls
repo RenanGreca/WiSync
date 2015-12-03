@@ -1,4 +1,4 @@
-PWD /Users/renangreca/Dropbox/repos/WiSync/docs/tg
+PWD /Users/renangreca/Dropbox/repos/WiSync/docs/monografia
 INPUT /usr/local/texlive/2015/texmf.cnf
 INPUT /usr/local/texlive/2015/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2015/texmf-var/web2c/pdftex/pdflatex.fmt
@@ -152,12 +152,6 @@ INPUT tg.toc
 INPUT /usr/local/texlive/2015/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
 OUTPUT tg.toc
 INPUT /usr/local/texlive/2015/texmf-dist/fonts/tfm/public/cm/cmsl12.tfm
-INPUT 0-resumo.tex
-INPUT 0-resumo.tex
-INPUT 0-abstract.tex
-INPUT 0-abstract.tex
-INPUT 1-introducao.tex
-INPUT 1-introducao.tex
 INPUT /usr/local/texlive/2015/texmf-dist/fonts/tfm/public/cm/cmti12.tfm
 INPUT /usr/local/texlive/2015/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm
 INPUT /usr/local/texlive/2015/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm
@@ -169,11 +163,7 @@ INPUT /usr/local/texlive/2015/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm7
 INPUT /usr/local/texlive/2015/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm5.tfm
 INPUT /usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 INPUT /usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
-INPUT 2-revisao.tex
-INPUT 2-revisao.tex
 INPUT /usr/local/texlive/2015/texmf-dist/fonts/tfm/public/cm/cmtt12.tfm
-INPUT 3-desenvolvimento.tex
-INPUT 3-desenvolvimento.tex
 INPUT img/a.png
 INPUT ./img/a.png
 INPUT ./img/a.png
@@ -186,10 +176,6 @@ INPUT ./img/c.png
 INPUT img/d.png
 INPUT ./img/d.png
 INPUT ./img/d.png
-INPUT 4-resultados.tex
-INPUT 4-resultados.tex
-INPUT 5-conclusao.tex
-INPUT 5-conclusao.tex
 INPUT tg.bbl
 INPUT tg.bbl
 INPUT tg.aux
