@@ -139,7 +139,7 @@ Com sincronização, queremos dizer que o programa irá, para cada instância ro
 
 \section{Python}
 
-Python é uma das linguagens de programação de alto nível mais populares no momento em que este texto foi escrito\cite{toplanguages2015}. Isso se deve em parte à facilidade em aprendê-la, à agilidade ao escrever software, à ampla disponibilidade de bibliotecas eficientes e à grande comunidade disposta a auxiliar outros programadores. 
+Python\cite{python} é uma das linguagens de programação de alto nível mais populares no momento em que este texto foi escrito\cite{toplanguages2015}. Isso se deve em parte à facilidade em aprendê-la, à agilidade ao escrever software, à ampla disponibilidade de bibliotecas eficientes e à grande comunidade disposta a auxiliar outros programadores. 
 É uma linguagem interpretada, então programas criados com ela não enfatizam desempenho, sendo frequentemente muitas vezes mais lentos do que programas similares construídos em linguagens como C ou Java[falta referência].
 Contudo, essa lentidão só se demonstra um problema em algoritmos computacionalmente pesados.
 Quando esse não é o caso, um programador pode optar pelo desenvolvimento mais rápido do Python em troca de alguns segundos a mais na hora de rodar o programa.
@@ -155,7 +155,7 @@ Após alguma pesquisa, quatro alternativas foram consideradas:
 \end{itemize}
 
 \section {JSON}
-O \textit{JavaScript Object Notation}, ou JSON\cite{json}, é um formato de armazenamento e troca de dados baseado na notação de objetos do JavaScript. Com o JSON, é possível armazenar objetos de um programa em um arquivo de texto, utilizando os tipos dictionary, array, string, number e boolean do JavaScript.
+O \textit{JavaScript Object Notation}, ou JSON, é um formato de armazenamento e troca de dados baseado na notação de objetos do JavaScript. Com o JSON, é possível armazenar objetos de um programa em um arquivo de texto, utilizando os tipos \textit{array}, \textit{string}, \textit{number} e \textit{boolean} do JavaScript\cite{json}.
 O JSON foi escolhido por sua simples integração com Python e por ser um formato facilmente legível por um humano, facilitando a verificação dos dados durante os testes.
 Contudo, essa facilidade de leitura também se mostra um risco, já que é possível alterar os dados armazenados por fora do programa e então gerar resultados inesperados.
 
@@ -165,7 +165,7 @@ Contudo, essa facilidade de leitura também se mostra um risco, já que é poss�
 \label{desenvolvimento}
 Neste capítulo, será descrita o desenvolvimento e as soluções da implementação do WiSync para este trabalho.
 
-A versão do WiSync entregue com este texto foi escrita em Python \cite{python}, versão 2.7, linguagem de programação interpretada originalmente lançada em 1991.
+A versão do WiSync entregue com este texto foi escrita em Python \cite{python}, versão 2.7.
 Python foi escolhida por sua facilidade na implementação e extensa disponibilidade de bibliotecas de código aberto.
 
 Originalmente, havia como objetivo tornar o programa compatível com os três sistemas operacionais mais comuns do mundo: Microsoft Windows, Apple OS X e Linux.
@@ -200,7 +200,7 @@ Como citado anteriormente, o programa \texttt{woof.py} \cite{woof} foi usado com
 Para se adequar às necessidades do WiSync, algumas pequenas mas importantes mudanças tiveram que ser feitas:
 \begin{itemize}
   \item Após servir um arquivo ao outro computador, o endereço IP do computador remoto é armazenado para poder ser utilizado novamente no futuro sem depender de outras buscas por endereços.
-  \item Originalmente, o \texttt{woof.py} utilizava diversas \textit{threads} para permitir o \textit{download} simultâneo de arquivos. Como essa funcionalidade não é necessária para o WiSync e as múltiplas \textit{threads} causavam consequências indesejadas, o código foi alterado para desabilitar isso. 
+  \item Originalmente, o \texttt{woof.py} utilizava diversas \textit{threads} para permitir o \textit{download} simultâneo de arquivos. Como essa funcionalidade não é necessária para o WiSync e as múltiplas \textit{threads} causavam consequências indesejadas, o código foi alterado para desabilitar isso.
 \end{itemize}
 
 \section{Situações consideradas}

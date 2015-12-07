@@ -209,6 +209,10 @@ def compare(a, b):
                 created[name] = file
         else:
             if name in b:
+                #if name == 'b.png':
+                #    from IPython import embed
+                #    embed()
+                #    exit()
                 if file['datem'] > b[name]['datem']:
                     #print 'Arquivo ', name, ' foi modificado'
                     altered[name] = file
@@ -258,8 +262,8 @@ def dates(f):
         Data de modificação do arquivo.
         Data de criação do arquivo.
     """
-    datem = datetime.fromtimestamp(getmtime(f)).isoformat()
-    datec = datetime.fromtimestamp(getctime(f)).isoformat()
+    datem = datetime.fromtimestamp(getmtime(f)).isoformat().split('.')[0]
+    datec = datetime.fromtimestamp(getctime(f)).isoformat().split('.')[0]
     return datem, datec
 
 
