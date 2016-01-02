@@ -36,9 +36,11 @@ def main(args):
     # O argumento -s força o modo servidor
     if args.server:
         net = WiNet(direc, args.hostname, True)
+        direc.remote_hostname = net.remote_hostname
         net.server()
     else:
         net = WiNet(direc, args.hostname, False)
+        direc.remote_hostname = net.remote_hostname
         net.client()
 
     # Salva os dados no diretório para a próxima sincronização

@@ -43,12 +43,15 @@ class WiNet():
         self.ip = socket.gethostbyname(self.host+'.local')
 
         self.remote_addr = None
-        print hostname
+        self.remote_hostname = None
         if hostname is not None:
                 try:
                     host = hostname.split('.')[0]
+                    self.remote_hostname = host
                     self.remote_addr = socket.gethostbyname(host+'.local')
+
                 except Exception:
+                    self.remote_hostname = socket.gethostbyaddr(hostname)[0]
                     self.remote_addr = hostname
 
         self.isServer = isServer
@@ -134,7 +137,7 @@ class WiNet():
 
         if self.remote_addr is not None:
             try:
-                print 'http://'+self.remote_addr+':8080/'+filename
+                print '[C] Procurando arquivo em: http://'+self.remote_addr+':8080/'+filename
                 response = urllib2.urlopen('http://'+self.remote_addr+':8080/'+filename, timeout=100)
                 return chunk_read(response, filename, report_hook=chunk_report)
             except urllib2.HTTPError, e:
@@ -159,9 +162,10 @@ class WiNet():
                 sys.stdout.write("\r[C] Buscando arquivo... %s" % addr)
                 sys.stdout.flush()
                 try:
-                    response = urllib2.urlopen(addr, timeout=0.1)
+                    response = urllib2.urlopen(addr, timeout=0.2)
                     sys.stdout.write("\n")
-                    self.remote_addr = addr
+                    self.remote_addr = host
+                    print "remote_addr:", self.remote_addr
                     return chunk_read(response, filename, report_hook=chunk_report)
                 except Exception:
                     pass
@@ -233,13 +237,13 @@ class WiNet():
             else:
                 sleep(1)
                 data = self.remote_file(urllib2.quote(name))
-                with open(join(directory, name), "w") as d:
+                filename = f['name']
+                with open(join(directory, filename), "w") as d:
                     d.write(data)
 
                 atime = time.mktime(parser.parse(f['datec']).timetuple())
                 mtime = time.mktime(parser.parse(f['datem']).timetuple())
-                print atime, mtime
-                utime(join(directory, name), (atime, mtime))
+                utime(join(directory, filename), (atime, mtime))
 
     def clean_up(self, files, directory=None):
         if directory is None:
@@ -256,7 +260,8 @@ class WiNet():
                 self.clean_up(f['files'], directory=join(directory, f['name']))
             else:
                 filename = join(directory, name)
-                remove(filename)
+                if exists(filename):
+                    remove(filename)
 
 # funções auxiliares
 def chunk_report(bytes_so_far, chunk_size, total_size, filename):
@@ -283,7 +288,7 @@ def chunk_report(bytes_so_far, chunk_size, total_size, filename):
         sys.stdout.write('\n')
 
 
-def chunk_read(response, filename, chunk_size=8192, report_hook=None):
+def chunk_read(response, filename, chunk_size=16384, report_hook=None):
     """ Baixa um arquivo em blocos para poder exibir o progresso.
 
     :: PARAMS ::

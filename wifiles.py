@@ -46,7 +46,8 @@ class WiFiles():
         f.write(data)
         f.close()
 
-        self.remote_files = None
+        self.hostname = socket.gethostname()
+        self.remote_hostname = None
 
     def read_dir(self, direc=None, level=0):
         """ Lê um diretório e armazena informações sobre os arquivos contidos nele.
@@ -125,8 +126,11 @@ class WiFiles():
                 print 'Diretório B não mudou'
 
             changes_a = compare_with_previous(dir_a['files'], dir_c['files'])
+            changes_a['deleted'] = check_deleted(dir_a['files'], dir_b['files'], dir_c['files'])
 
             changes_b = compare_with_previous(dir_b['files'], dir_c['files'])
+            changes_b['deleted'] = check_deleted(dir_b['files'], dir_a['files'], dir_c['files'])
+
         except Exception:
             print "[F] last_sync.json não encontrado!"
             print "[F] Realizando sincronização inicial."
@@ -134,12 +138,15 @@ class WiFiles():
             if dir_a['datem'] == dir_b['datem']:
                 print 'Diretórios não mudaram'
 
-            changes_a = compare_with_previous(dir_a['files'], dir_b['files'], check_removed=False)
+            changes_a = compare_with_previous(dir_a['files'], dir_b['files'])
 
-            changes_b = compare_with_previous(dir_b['files'], dir_a['files'], check_removed=False)
+            changes_b = compare_with_previous(dir_b['files'], dir_a['files'])
 
-        resolve_conflicts(changes_a["created"], changes_b["created"])
-        resolve_conflicts(changes_a["altered"], changes_b["altered"])
+        resolve_conflicts(changes_a["created"], changes_b["created"], self.hostname)
+        resolve_conflicts(changes_b["created"], changes_a["created"], self.remote_hostname)
+
+        resolve_conflicts(changes_a["altered"], changes_b["altered"], self.hostname)
+        resolve_conflicts(changes_b["altered"], changes_a["altered"], self.remote_hostname)
 
         changes = {'server': changes_a, 'client': changes_b}
 
@@ -163,13 +170,16 @@ class WiFiles():
         f.close()
 
 
-def resolve_conflicts(a, b):
+def resolve_conflicts(a, b, hostname):
     for name, f in a.iteritems():
-        if name in b:
-            if f['datem'] != b[name]['datem'] and not f['isDir']:
-                f['name'] = '(A) '+f['name']
-                b[name]['name'] = '(B) '+f['name']
-
+        if f['isDir']:
+            if name in b and b[name]['isDir']:
+                resolve_conflicts(f['files'], b[name]['files'], hostname)
+        else:
+            if name in b:
+                if f['datem'] != b[name]['datem'] and not f['isDir']:
+                    newname = '(' + hostname + ') ' + name
+                    a[name]['name'] = newname
 
 def compare_with_previous(files, oldfiles, check_removed=True):
     changes = {
@@ -181,9 +191,9 @@ def compare_with_previous(files, oldfiles, check_removed=True):
     print 'Procurando arquivos novos ou modificados'
     changes["created"], changes["altered"] = compare(files, oldfiles)
 
-    if check_removed:
-        print 'Procurando arquivos removidos'
-        changes["deleted"], ignore = compare(oldfiles, files)
+    # if check_removed:
+    #     print 'Procurando arquivos removidos'
+    #     changes["deleted"], ignore = compare(oldfiles, files)
 
     return changes
 
@@ -209,10 +219,6 @@ def compare(a, b):
                 created[name] = file
         else:
             if name in b:
-                #if name == 'b.png':
-                #    from IPython import embed
-                #    embed()
-                #    exit()
                 if file['datem'] > b[name]['datem']:
                     #print 'Arquivo ', name, ' foi modificado'
                     altered[name] = file
@@ -220,6 +226,35 @@ def compare(a, b):
                 created[name] = file
 
     return created, altered
+
+
+def check_deleted(a, b, c):
+    deleted = {}
+
+    for name, f in c.iteritems():
+        if name == '.DS_Store' or name == 'desktop.ini':
+            continue
+
+        if f['isDir']:
+            if name in a and name in b:
+                d = check_deleted(f['files'], a[name]['files'], b[name]['files'])
+                deleted[name] = f
+                deleted[name]['files'] = d
+        else:
+            if name not in a:
+                # from IPython import embed
+                # embed()
+                if f['datem'] == b[name]['datem']:
+                    # Arquivo foi excluído em A e não modificado em B
+                    print 'Arquivo ', name, ' foi excluído em A'
+                    deleted[name] = f
+            # if name not in b:
+            #     if f['datem'] <= a[name]['datem']:
+            #         # Arquivo foi excluído em B e não modificado em A
+            #         print 'Arquivo ', name, ' foi excluído em B'
+            #         deleted[name] = f
+
+    return deleted
 
 
 class File():

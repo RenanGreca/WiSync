@@ -371,6 +371,8 @@ def serve_files(filename, maxdown=1, ip_addr='', port=8080):
     #while cpid != 0 and maxdownloads > 0:
     httpd.handle_request()
 
+    #return ip_addr
+
     global cli_addr
     return cli_addr
 
